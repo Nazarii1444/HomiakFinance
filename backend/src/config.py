@@ -1,5 +1,5 @@
 import os
-
+import logging
 from dotenv import load_dotenv
 
 # Just a config file
@@ -16,40 +16,9 @@ DATABASE_URL: str = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{
 
 origins = [
     "http://localhost:3000",
-    "http://localhost",
-    "http://93.115.23.34/",
-    "http://93.115.23.34:80",
-    "https://93.115.23.34:80",
 ]
 
 # ====== logging =====
-
-import logging, sys
-from logging.config import dictConfig
-
-dictConfig({
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {"format": "%(asctime)s %(levelname)s [%(name)s] %(message)s"}
-    },
-    "handlers": {
-        "stdout": {
-            "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-            "formatter": "default",
-        }
-    },
-    "root": {"level": "DEBUG", "handlers": ["stdout"]},
-    "loggers": {
-        "uvicorn": {"level": "DEBUG", "handlers": ["stdout"], "propagate": False},
-        "uvicorn.error": {"level": "DEBUG", "handlers": ["stdout"], "propagate": False},
-        "uvicorn.access": {"level": "INFO", "handlers": ["stdout"], "propagate": False},
-        "gunicorn": {"level": "DEBUG", "handlers": ["stdout"], "propagate": False},
-        "gunicorn.error": {"level": "DEBUG", "handlers": ["stdout"], "propagate": False},
-        "gunicorn.access": {"level": "INFO", "handlers": ["stdout"], "propagate": False},
-    },
-})
 
 logging.basicConfig(
     filename='logs.log',
