@@ -32,3 +32,7 @@ console_handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
+
+
+# currencies
+API_URL = "https://api.frankfurter.app/latest?from=USD&to=UAH,EUR,GBP,CAD"
