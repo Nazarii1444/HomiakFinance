@@ -8,7 +8,7 @@ from src.utils.exceptions import user_not_admin_exception, user_not_found_except
 from src.utils.getters_services import get_user_by_email, get_user_by_id
 from src.utils.jwt_handlers import decode_access_token
 
-bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+bcrypt_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

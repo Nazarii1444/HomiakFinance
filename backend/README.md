@@ -154,14 +154,22 @@ If you get this response: `{"status":"OK"}`, then you are good to go!
 
 ---
 
-## Useful queries:
-### Delete all enums
+### Delete all tables and enums
 ```sql
 DO
 $$
 DECLARE
+    tbl TEXT;
     enum_type RECORD;
 BEGIN
+    FOR tbl IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE format('DROP TABLE IF EXISTS public.%I CASCADE', tbl);
+    END LOOP;
+
     FOR enum_type IN
         SELECT n.nspname AS schema_name, t.typname AS enum_name
         FROM pg_type t
@@ -173,22 +181,3 @@ BEGIN
     END LOOP;
 END;
 $$;
-```
-
-### Delete all tables
-```sql
-DO
-$$
-DECLARE
-    tbl TEXT;
-BEGIN
-    FOR tbl IN
-        SELECT tablename
-        FROM pg_tables
-        WHERE schemaname = 'public'
-    LOOP
-        EXECUTE format('DROP TABLE IF EXISTS public.%I CASCADE', tbl);
-    END LOOP;
-END;
-$$;
-```

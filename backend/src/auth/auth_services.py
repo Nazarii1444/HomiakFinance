@@ -11,13 +11,12 @@ from src.utils.auth_services import hash_password, verify_password
 
 async def create_user(db: AsyncSession, user: UserCreate) -> User:
     """New user creation"""
+    print("Password: ", user.password)
     new_user = User(
         username=user.username,
         email=user.email,
         hashed_password=hash_password(user.password),
-        default_currency=user.default_currency,
-        timezone=user.timezone,
-        capital=0.0,
+        capital=0.0
     )
 
     db.add(new_user)

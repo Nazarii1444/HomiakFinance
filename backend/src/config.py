@@ -1,6 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Just a config file
 load_dotenv()
@@ -18,7 +19,7 @@ origins = [
     "http://localhost:3000",
 ]
 
-# ====== logging =====
+# ===== logging =====
 
 logging.basicConfig(
     filename='logs.log',
@@ -34,5 +35,10 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-# currencies
-API_URL = "https://api.frankfurter.app/latest?from=USD&to=UAH,EUR,GBP,CAD"
+# ===== currencies =====
+NBU_API_URL = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json"
+
+# ===== JWT =====
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 1h
+ACCESS_TOKEN_EXPIRES = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
