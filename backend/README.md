@@ -7,12 +7,26 @@
 ```bash
 git clone https://github.com/Nazarii1444/HomiakFinance.git
 ```
-2. Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
-
-3. Create an environment:
+2. Create an environment:
 ```bash
-uv sync
+python -m venv .venv
+```
+
+3. Activate environment
+
+```bash
+source .venv/bin/activate (mac/linux)
+```
+
+```bash
+.\.venv\Scripts\activate (windows)
+```
+
+4. Install requirements
+
+```bash
+pip install -r requirements.txt
 ```
 
 4. Create a DB named `homiakdb` in pgadmin4.
@@ -140,8 +154,6 @@ alembic revision --autogenerate -m "Init tables"
 ```bash
 alembic upgrade head
 ```
-
----
 
 11. Run development server
 ```bash
