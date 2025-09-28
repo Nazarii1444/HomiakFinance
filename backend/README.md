@@ -29,14 +29,14 @@ source .venv/bin/activate (mac/linux)
 pip install -r requirements.txt
 ```
 
-4. Create a DB named `homiakdb` in pgadmin4.
+5. Create a DB named `homiakdb` in pgadmin4.
 
-5. Init alembic:
+6. Init alembic:
 ```bash
 alembic init alembic
 ```
 
-6. Ensure you have `.env` file with the following variables:
+7. Ensure you have `.env` file with the following variables:
 
 ```bash
 POSTGRES_USER=homiakuser
@@ -46,7 +46,7 @@ DB_PORT=5432
 DB_NAME=homiakdb
 ```
 
-7. Change `alembic/env.py` to the following code:
+8. Change `alembic/env.py` to the following code:
 ```python
 import asyncio
 import os
@@ -98,7 +98,7 @@ else:
     asyncio.run(run_migrations_online())
 ```
 
-8. Change `alembic.ini` to the following:
+9. Change `alembic.ini` to the following:
 ```bash
 [alembic]
 script_location = %(here)s/alembic
