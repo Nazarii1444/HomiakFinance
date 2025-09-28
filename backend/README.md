@@ -39,8 +39,8 @@ alembic init alembic
 7. Ensure you have `.env` file with the following variables:
 
 ```bash
-POSTGRES_USER=homiakuser
-POSTGRES_PASSWORD=
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=homiakdb
