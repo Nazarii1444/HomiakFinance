@@ -64,7 +64,7 @@ async def create_transaction(
         "amount": payload.amount,
         "kind": payload.kind,
         "category_name": payload.category_name,
-        "currencies": payload.currency,
+        "currency": payload.currency,
     }
     if payload.date is not None:
         values["date"] = payload.date
