@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
@@ -27,6 +27,7 @@ from src.utils.jwt_handlers import (
     create_refresh_token,
     create_access_token
 )
+from src.auth.auth_services import check_password_strength
 
 auth_router = APIRouter()
 
@@ -37,6 +38,10 @@ async def sign_up(request: Request, user: UserCreate, db: AsyncSession = Depends
         raise email_already_registered_exception
     if await get_user_by_username(db, user.username):
         raise username_already_registered_exception
+
+    errors = check_password_strength(user.password)
+    if errors:
+        raise HTTPException(status_code=400, detail=errors)
 
     new_user = await create_user(db, user)
 
