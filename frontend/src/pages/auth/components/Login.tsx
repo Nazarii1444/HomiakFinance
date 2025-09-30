@@ -1,138 +1,46 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  TextField,
-  Button,
-  Typography,
-  InputAdornment,
-  IconButton,
-} from '@mui/material';
-import {
-  Person as PersonIcon,
-  Lock as LockIcon,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
-import '../styles/Login.scss';
-import {Link} from "react-router-dom";
-import type {LoginFormData} from "../types/types.ts";
+// pages/Login.tsx
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthForm from '../components/AuthForm';
+import type { AuthFormData } from '../types/types';
+import {useAppDispatch, useAppSelector} from "../../../store/hooks.ts";
+import {clearError, loginUser} from "../../../store/slices/authSlice.ts";
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
-    login: '',
-    password: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  const handleInputChange = (field: keyof LoginFormData) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: event.target.value,
-    }));
-  };
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(prev => !prev);
-  };
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsLoading(true);
+  const handleSubmit = async (formData: AuthFormData) => {
+    const loginData = {
+      email: formData.login,
+      password: formData.password,
+    };
 
     try {
-      console.log('Login attempt:', formData);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Login successful!');
+      await dispatch(loginUser(loginData)).unwrap();
     } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('Login failed:', error);
     }
   };
 
   return (
-    <Box className="login-container">
-      <Card className="login-card">
-        <Box className="login-header">
-          <Typography variant="h4" component="h1" className="login-title">
-            Sign In
-          </Typography>
-          <Typography variant="body2" className="login-subtitle">
-            Enter your credentials to continue
-          </Typography>
-        </Box>
-
-        <Box component="form" onSubmit={handleSubmit} className="login-form">
-          <TextField
-            fullWidth
-            label="Login"
-            variant="outlined"
-            value={formData.login}
-            onChange={handleInputChange('login')}
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            variant="outlined"
-            value={formData.password}
-            onChange={handleInputChange('password')}
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleTogglePasswordVisibility}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            size="large"
-            disabled={isLoading}
-            className="login-button"
-          >
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </Button>
-
-          <Box className="login-navigation">
-            <Typography variant="body2" className="login-nav-text">
-              Don't have an account?{' '}
-              <Link to="/register" className="login-nav-link">
-                Sign up
-              </Link>
-            </Typography>
-          </Box>
-        </Box>
-      </Card>
-    </Box>
+    <AuthForm
+      onSubmit={handleSubmit}
+      isLogin={true}
+      loading={loading}
+      error={error}
+    />
   );
 };
 

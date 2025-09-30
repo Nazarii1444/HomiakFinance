@@ -1,0 +1,136 @@
+body {
+  background-color: #f8fafc; /* slate-50 */
+  font-family: 'Inter', sans-serif;
+}
+
+.dashboard-container {
+  max-width: 896px; /* max-w-4xl */
+  margin: auto;
+}
+
+.balance-card {
+  background: linear-gradient(to bottom right, #3b82f6, #1d4ed8); /* from-blue-500 to-blue-700 */
+  color: white;
+  border-radius: 24px !important;
+  padding: 24px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.balance-card .balance-title {
+  font-size: 1.125rem;
+  opacity: 0.8;
+}
+
+.balance-card .balance-brand {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.balance-card .balance-amount {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.balance-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.balance-summary .summary-item {
+  flex: 1;
+  text-align: center;
+}
+
+.balance-summary .summary-label {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  opacity: 0.7;
+  letter-spacing: 0.05em;
+}
+
+.balance-summary .summary-value.income {
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.balance-summary .summary-value.expense {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.balance-summary .divider {
+  width: 1px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.transactions-section {
+  margin-top: 32px;
+}
+
+.transactions-header {
+  margin-bottom: 16px;
+}
+
+.transaction-item {
+  background-color: white;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  margin-bottom: 12px !important;
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transaction-item:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.transaction-item .icon-wrapper {
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+}
+
+.transaction-item .icon-wrapper.income {
+  background-color: #dcfce7;
+  color: #22c55e; /* green-500 */
+}
+
+.transaction-item .icon-wrapper.expense {
+  background-color: #fee2e2; /* Light red, similar to red-50 */
+  color: #dc2626; /* Dark red, similar to red-600 */
+}
+
+.transaction-item .amount-text {
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.transaction-item .amount-text.income {
+  color: #22c55e;
+}
+
+.transaction-item .amount-text.expense {
+  color: #ef4444;
+}
+
+.dashboard-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  position: fixed;
+  width: 100%;
+  bottom: 70px;
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%);
+}

@@ -1,24 +1,42 @@
-export interface RegisterFormData {
-  login: string;
-  password: string;
-}
-
-export interface LoginFormData {
-  login: string;
-  password: string;
-}
-
+// types/types.ts
 export interface User {
-  login: string;
+  id: string;
+  email: string;
+  username: string;
 }
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
-export interface LoginPayload {
-  user: User;
-  token: string;
+export interface AuthFormData {
+  login: string;
+  password: string;
+  username?: string; // Optional for registration
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+}
+
+export interface TokenPair {
+  access_token: string;
+  refresh_token: string;
 }

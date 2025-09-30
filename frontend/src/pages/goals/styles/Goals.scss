@@ -1,0 +1,155 @@
+/* --- Base Page Layout --- */
+.goals-container {
+    max-width: 896px;
+    margin: 32px auto;
+    padding: 0 16px;
+    font-family: 'Inter', sans-serif;
+}
+
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.goals-title {
+    font-weight: 700 !important;
+    color: #1e293b; /* slate-800 */
+}
+
+.add-goal-button {
+    background-color: #2563eb !important; /* blue-600 */
+    color: white !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    padding: 8px 16px !important;
+}
+
+/* --- Goals List and Card Styles --- */
+
+.goals-list {
+    padding: 0;
+}
+
+.no-goals-message {
+    text-align: center;
+    color: #64748b; /* slate-500 */
+    padding: 40px;
+    font-style: italic;
+}
+
+.goal-card {
+    background-color: white;
+    border-radius: 16px !important;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+    margin-bottom: 16px;
+    padding: 12px 20px;
+    display: flex; /* To manage the ListItem layout */
+    align-items: center;
+    transition: box-shadow 300ms;
+}
+
+.goal-card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+.goal-card .MuiListItem-root {
+    align-items: center;
+}
+
+/* Status Icon Styling (Left Side) */
+.goal-status-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    color: #2563eb; /* Active icon color: blue-600 */
+    background-color: #eff6ff; /* blue-50 */
+}
+
+.goal-card.completed .goal-status-icon-wrapper {
+    color: #10b981; /* Completed icon color: emerald-500 */
+    background-color: #ecfdf5; /* green-50 */
+}
+
+/* Goal Details (Name and Target) */
+.goal-details {
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+.goal-details .MuiListItemText-primary {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
+.goal-details .MuiListItemText-secondary {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Progress Bar and Amount Info */
+.goal-progress-info {
+    flex-grow: 0;
+    min-width: 200px; /* Ensures space for the progress bar */
+    text-align: right;
+    margin-right: 24px;
+}
+
+.goal-progress-info .current-amount {
+    font-weight: 600;
+    color: #334155; /* slate-700 */
+    margin-bottom: 4px;
+}
+
+.progress-bar {
+    height: 8px !important;
+    border-radius: 4px;
+    background-color: #e2e8f0; /* slate-200 */
+}
+
+/* Progress bar color for active goals */
+.progress-bar .MuiLinearProgress-bar {
+    background-color: #2563eb; /* blue-600 */
+}
+
+/* Progress bar color for completed goals */
+.goal-card.completed .progress-bar .MuiLinearProgress-bar {
+    background-color: #10b981; /* emerald-500 */
+}
+
+.progress-percent {
+    color: #64748b;
+    margin-top: 4px;
+    display: block;
+    font-weight: 500;
+}
+
+/* Action Buttons */
+.goal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.fund-button, .delete-button {
+    color: #94a3b8; /* slate-400 */
+    transition: color 200ms;
+}
+
+.fund-button:hover {
+    color: #2563eb; /* blue-600 on hover */
+}
+
+.delete-button:hover {
+    color: #ef4444; /* red-500 on hover */
+}
+
+/* Disabled fund button for completed goals */
+.fund-button.Mui-disabled {
+    color: #cbd5e1 !important; /* slate-300 */
+}

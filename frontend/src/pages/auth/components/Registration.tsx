@@ -1,138 +1,53 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  TextField,
-  Button,
-  Typography,
-  InputAdornment,
-  IconButton,
-} from '@mui/material';
-import {
-  Person as PersonIcon,
-  Lock as LockIcon,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
-import '../styles/Register.scss';
-import {Link} from "react-router-dom";
-import type {RegisterFormData} from "../types/types.ts";
+// pages/Register.tsx
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthForm from '../components/AuthForm';
+
+import type { AuthFormData } from '../types/types';
+import {useAppDispatch, useAppSelector} from "../../../store/hooks.ts";
+import {clearError, registerUser} from "../../../store/slices/authSlice.ts";
 
 const Register: React.FC = () => {
-  const [formData, setFormData] = useState<RegisterFormData>({
-    login: '',
-    password: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  const handleInputChange = (field: keyof RegisterFormData) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: event.target.value,
-    }));
-  };
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(prev => !prev);
-  };
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsLoading(true);
+  const handleSubmit = async (formData: AuthFormData) => {
+    if (!formData.username) {
+      console.error('Username is required for registration');
+      return;
+    }
+
+    const registerData = {
+      email: formData.login,
+      username: formData.username,
+      password: formData.password,
+    };
 
     try {
-      console.log('Register attempt:', formData);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Registration successful!');
+      await dispatch(registerUser(registerData)).unwrap();
     } catch (error) {
-      console.error('Register error:', error);
-      alert('Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('Registration failed:', error);
     }
   };
 
   return (
-    <Box className="register-container">
-      <Card className="register-card">
-        <Box className="register-header">
-          <Typography variant="h4" component="h1" className="register-title">
-            Sign Up
-          </Typography>
-          <Typography variant="body2" className="register-subtitle">
-            Create your account to get started
-          </Typography>
-        </Box>
-
-        <Box component="form" onSubmit={handleSubmit} className="register-form">
-          <TextField
-            fullWidth
-            label="Login"
-            variant="outlined"
-            value={formData.login}
-            onChange={handleInputChange('login')}
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            variant="outlined"
-            value={formData.password}
-            onChange={handleInputChange('password')}
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleTogglePasswordVisibility}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            size="large"
-            disabled={isLoading}
-            className="register-button"
-          >
-            {isLoading ? 'Creating Account...' : 'Sign Up'}
-          </Button>
-
-          <Box className="register-navigation">
-            <Typography variant="body2" className="register-nav-text">
-              Already have an account?{' '}
-              <Link to="/login" className="register-nav-link">
-                Sign in
-              </Link>
-            </Typography>
-          </Box>
-        </Box>
-      </Card>
-    </Box>
+    <AuthForm
+      onSubmit={handleSubmit}
+      isLogin={false}
+      loading={loading}
+      error={error}
+    />
   );
 };
 
