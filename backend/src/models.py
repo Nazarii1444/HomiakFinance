@@ -42,6 +42,8 @@ class User(Base):
     timezone = Column(String(64), nullable=True)
     capital = Column(Float, nullable=False, default=0.0)
     role = Column(Enum(UserStatus), nullable=False, default=UserStatus.USER)
+    twofa_secret = Column(String(32), nullable=True)
+    twofa_enabled = Column(Boolean, nullable=False, default=False)
 
     # relationships
     transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
