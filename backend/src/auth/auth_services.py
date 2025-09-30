@@ -14,7 +14,6 @@ from src.auth.password_validator import validate_password
 
 async def create_user(db: AsyncSession, user: UserCreate) -> User:
     """New user creation"""
-    print("Password: ", user.password)
     new_user = User(
         username=user.username,
         email=user.email,

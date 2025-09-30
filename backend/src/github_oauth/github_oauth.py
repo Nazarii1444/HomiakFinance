@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, Request, status
-from starlette.responses import JSONResponse, RedirectResponse
 from authlib.integrations.starlette_client import OAuth
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from starlette.responses import JSONResponse, RedirectResponse
 
+from src.auth.auth_services import create_user
+from src.auth.schemas import UserCreate
 from src.config import (
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
@@ -11,10 +12,7 @@ from src.config import (
     JWT_REFRESH_COOKIE_NAME
 )
 from src.database import get_db
-from src.models import User
 from src.utils.getters_services import get_user_by_email
-from src.auth.schemas import UserCreate
-from src.auth.auth_services import create_user
 from src.utils.jwt_handlers import create_access_token, create_refresh_token
 
 github_oauth_router = APIRouter(prefix="/auth/github", tags=["auth-github"])
@@ -45,8 +43,8 @@ async def github_login(request: Request):
 
 @github_oauth_router.get("/callback", name="github_callback")
 async def github_callback(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
+        request: Request,
+        db: AsyncSession = Depends(get_db),
 ):
     token = await oauth.github.authorize_access_token(request)
     if not token:
