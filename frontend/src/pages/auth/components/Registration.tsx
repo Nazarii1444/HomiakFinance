@@ -10,7 +10,7 @@ import {clearError, registerUser} from "../../../store/slices/authSlice.ts";
 const Register: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { error, isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -45,7 +45,6 @@ const Register: React.FC = () => {
     <AuthForm
       onSubmit={handleSubmit}
       isLogin={false}
-      loading={loading}
       error={error}
     />
   );

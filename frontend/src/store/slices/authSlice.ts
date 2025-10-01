@@ -8,7 +8,6 @@ import type {UserUpdateData} from "../../pages/profile/types/types.ts";
 const initialState: AuthState = {
     user: null,
     isAuthenticated: false,
-    loading: false,
     error: null,
     accessToken: null,
     refreshToken: null,
@@ -87,11 +86,9 @@ const authSlice = createSlice({
         logout: (state) => {
             state.user = null;
             state.isAuthenticated = false;
-            state.loading = false;
             state.error = null;
             state.accessToken = null;
             state.refreshToken = null;
-            // Clear token from API service
             authAPI.setAccessToken(null);
         },
         clearError: (state) => {
@@ -102,11 +99,9 @@ const authSlice = createSlice({
         // Login cases
         builder
             .addCase(loginUser.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
-                state.loading = false;
                 state.user = action.payload.user;
                 state.isAuthenticated = true;
                 state.error = null;
@@ -114,7 +109,6 @@ const authSlice = createSlice({
                 state.refreshToken = action.payload.refresh_token;
             })
             .addCase(loginUser.rejected, (state, action) => {
-                state.loading = false;
                 state.user = null;
                 state.isAuthenticated = false;
                 state.error = action.payload as string;
@@ -124,11 +118,9 @@ const authSlice = createSlice({
 
             // Register cases
             .addCase(registerUser.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
             .addCase(registerUser.fulfilled, (state, action) => {
-                state.loading = false;
                 state.user = action.payload.user;
                 state.isAuthenticated = true;
                 state.error = null;
@@ -136,7 +128,6 @@ const authSlice = createSlice({
                 state.refreshToken = action.payload.refresh_token;
             })
             .addCase(registerUser.rejected, (state, action) => {
-                state.loading = false;
                 state.user = null;
                 state.isAuthenticated = false;
                 state.error = action.payload as string;

@@ -26,14 +26,12 @@ import '../styles/Register.scss';
 interface AuthFormProps {
     onSubmit: (formData: AuthFormData) => Promise<void>;
     isLogin?: boolean;
-    loading?: boolean;
     error?: string | null;
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({
                                                onSubmit,
                                                isLogin = true,
-                                               loading = false,
                                                error
                                            }) => {
     const [formData, setFormData] = useState<AuthFormData>({
@@ -143,7 +141,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
                         required
                         error={!!errors.login}
                         helperText={errors.login}
-                        disabled={loading}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -163,7 +160,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
                             required
                             error={!!errors.username}
                             helperText={errors.username || 'Choose a unique username'}
-                            disabled={loading}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -184,7 +180,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
                         required
                         error={!!errors.password}
                         helperText={errors.password || 'Min 8 chars, 1 uppercase, 1 number'}
-                        disabled={loading}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -196,7 +191,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
                                     <IconButton
                                         onClick={handleTogglePasswordVisibility}
                                         edge="end"
-                                        disabled={loading}
                                     >
                                         {showPassword ? <VisibilityOff/> : <Visibility/>}
                                     </IconButton>
@@ -210,10 +204,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
                         fullWidth
                         variant="contained"
                         size="large"
-                        disabled={loading || !isFormValid}
+                        disabled={!isFormValid}
                         className={isLogin ? 'login-button' : 'register-button'}
                     >
-                        {loading ? `${isLogin ? 'Signing In...' : 'Creating Account...'}` : isLogin ? 'Sign In' : 'Sign Up'}
+                        {isLogin ? 'Sign In' : 'Sign Up'}
                     </Button>
 
                     <Box className={isLogin ? 'login-navigation' : 'register-navigation'}>

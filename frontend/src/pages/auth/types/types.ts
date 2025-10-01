@@ -1,10 +1,10 @@
 // types/types.ts
 
+import type {User} from "../../profile/types/types.ts";
 
 export interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
-    loading: boolean;
     error: string | null;
     accessToken: string | null;
     refreshToken: string | null;

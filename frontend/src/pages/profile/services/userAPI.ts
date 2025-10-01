@@ -1,5 +1,6 @@
-import {store} from "../../../store";
-import type {User, UserUpdateData} from "../types/types.ts";
+import { store } from "../../../store";
+import { authAPI } from "../../auth/services/authAPI";  // Add this import
+import type { User, UserUpdateData } from "../types/types";
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -14,8 +15,9 @@ class UserAPI {
             'Content-Type': 'application/json',
         };
 
-        const state = store.getState();
-        const token = state.auth.accessToken;
+        // Try to get token from authAPI first, fallback to Redux
+        const token = authAPI.getAccessToken() || store.getState().auth.accessToken;
+
         if (token) {
             defaultHeaders.Authorization = `Bearer ${token}`;
         }
