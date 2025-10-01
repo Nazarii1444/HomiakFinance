@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     Container,
@@ -33,7 +33,7 @@ import {
     TrendingUp as TrendingIcon,
 } from '@mui/icons-material';
 import {useAppDispatch, useAppSelector} from '../../../store/hooks';
-import {logout, updateUserProfile} from '../../../store/slices/authSlice';
+import {fetchCurrentUser, logout, updateUserProfile} from '../../../store/slices/authSlice';
 
 const CURRENCY_SYMBOLS: { [key: string]: string } = {
     'USD': '$',
@@ -107,6 +107,10 @@ const Profile: React.FC = () => {
         const symbol = CURRENCY_SYMBOLS[currency] || currency;
         return `${symbol}${amount.toFixed(2)}`;
     };
+
+    useEffect(() => {
+        dispatch(fetchCurrentUser());
+    }, [dispatch]);
 
     return (
         <Box sx={{

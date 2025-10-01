@@ -8,6 +8,7 @@ export interface Transaction {
   currency: string;
   date: string;
   user_id: number;
+  new_capital?: number;
 }
 
 export interface TransactionCreate {

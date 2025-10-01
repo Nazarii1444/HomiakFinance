@@ -79,6 +79,20 @@ export const updateUserProfile = createAsyncThunk(
     }
 );
 
+export const fetchCurrentUser = createAsyncThunk(
+    'auth/fetchCurrentUser',
+    async (_, {rejectWithValue}) => {
+        try {
+            const user = await userAPI.getCurrentUser();
+            return user;
+        } catch (error) {
+            return rejectWithValue(
+                error instanceof Error ? error.message : 'Failed to fetch user'
+            );
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -93,6 +107,9 @@ const authSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        updateUser: (state, action) => {
+            state.user = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -136,7 +153,11 @@ const authSlice = createSlice({
             })
             .addCase(updateUserProfile.fulfilled, (state, action) => {
                 state.user = action.payload;
-            });
+            })
+
+            .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+                state.user = action.payload;
+            })
     },
 });
 

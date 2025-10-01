@@ -80,11 +80,11 @@ class TransactionAPI {
     });
   }
 
-  async deleteTransaction(id: number): Promise<void> {
-    await this.request<void>(`/transactions/${id}`, {
-      method: 'DELETE',
-    });
-  }
+  async deleteTransaction(id: number): Promise<{ new_capital: number; id_: number }> {
+  return this.request<{ new_capital: number; id_: number }>(`/transactions/${id}`, {
+    method: 'DELETE',
+  });
+}
 }
 
 export const transactionAPI = new TransactionAPI();
