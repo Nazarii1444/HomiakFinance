@@ -8,7 +8,7 @@ import {
     DialogTitle,
     Grid
 } from '@mui/material';
-import type {AddGoalModalProps} from "../types.ts";
+import type {AddGoalModalProps} from "../types/types.ts";
 
 const AddGoalModal: React.FC<AddGoalModalProps> = ({
     isOpen,

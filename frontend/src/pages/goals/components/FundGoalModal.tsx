@@ -9,7 +9,7 @@ import {
     Typography
 } from '@mui/material';
 import { formatCurrency } from "../utils/utils.ts";
-import type {FundGoalModalProps} from "../types.ts";
+import type {FundGoalModalProps} from "../types/types.ts";
 
 const FundGoalModal: React.FC<FundGoalModalProps> = ({
     isOpen,
@@ -26,7 +26,7 @@ const FundGoalModal: React.FC<FundGoalModalProps> = ({
             <DialogTitle>Fund {goalToFund.name}</DialogTitle>
             <DialogContent>
                 <Typography variant="subtitle1" sx={{mb: 1}}>
-                    Current: ${formatCurrency(goalToFund.currentAmount)} / Target: ${formatCurrency(goalToFund.targetAmount)}
+                    Current: ${formatCurrency(goalToFund.saved)} / Target: ${formatCurrency(goalToFund.summ)}
                 </Typography>
                 <TextField
                     autoFocus

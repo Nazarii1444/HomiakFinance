@@ -17,14 +17,14 @@ import {
 } from '@mui/icons-material';
 import { formatCurrency } from "../utils/utils.ts";
 import '../styles/Goals.scss';
-import type {GoalListProps} from "../types.ts";
+import type {GoalListProps} from "../types/types.ts";
 
 const GoalList: React.FC<GoalListProps> = ({ goals, onDelete, onFundOpen }) => {
     return (
         <List className="goals-list">
             {goals.length === 0 ? (
                 <Typography className="no-goals-message">
-                    You haven't set any goals yet. Start saving today! 🚀
+                    You haven't set any goals yet. Start saving today!
                 </Typography>
             ) : (
                 goals.map((goal) => {

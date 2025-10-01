@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
-import '../styles/Goals.scss';
-
-import type { Goal } from "../types.ts";
+import {useEffect, useState} from 'react';
+import {Box, Typography, Button, CircularProgress, Alert} from '@mui/material';
+import {Add as AddIcon} from '@mui/icons-material';
+import {useAppDispatch, useAppSelector} from '../../../store/hooks';
+import {fetchGoals, createGoal, updateGoal, deleteGoal} from '../../../store/slices/goalSlice';
+import type {Goal, GoalCreate, GoalUpdate} from "../types/types";
 import GoalList from './GoalList';
 import AddGoalModal from './AddGoalModal';
 import FundGoalModal from './FundGoalModal';
+import '../styles/Goals.scss';
 
 const Goals = () => {
-    const [goals, setGoals] = useState<Goal[]>([]);
+    const dispatch = useAppDispatch();
+    const {goals, loading, error} = useAppSelector((state) => state.goals);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [newGoalName, setNewGoalName] = useState('');
@@ -19,25 +21,29 @@ const Goals = () => {
     const [goalToFund, setGoalToFund] = useState<Goal | null>(null);
     const [fundAmount, setFundAmount] = useState('');
 
-    const handleAddGoal = () => {
+    // Fetch goals on component mount
+    useEffect(() => {
+        dispatch(fetchGoals());
+    }, [dispatch]);
+
+    const handleAddGoal = async () => {
         const target = parseFloat(newGoalTarget);
         if (newGoalName && target > 0) {
-            const newGoal: Goal = {
-                id: Date.now(),
+            const newGoalData: GoalCreate = {
                 name: newGoalName,
-                targetAmount: target,
-                currentAmount: 0,
-                dateAdded: new Date().toISOString().slice(0, 10),
+                summ: target,
+                saved: 0,
             };
-            setGoals([...goals, newGoal]);
+
+            await dispatch(createGoal(newGoalData));
             setIsAddModalOpen(false);
             setNewGoalName('');
             setNewGoalTarget('');
         }
     };
 
-    const handleDeleteGoal = (id: number) => {
-        setGoals(goals.filter(goal => goal.id !== id));
+    const handleDeleteGoal = async (id: number) => {
+        await dispatch(deleteGoal(id));
     };
 
     const handleOpenFundModal = (goal: Goal) => {
@@ -46,21 +52,33 @@ const Goals = () => {
         setFundAmount('');
     };
 
-    const handleFundGoal = () => {
+    const handleFundGoal = async () => {
         const amount = parseFloat(fundAmount);
         if (goalToFund && amount > 0) {
-            setGoals(goals.map(goal =>
-                goal.id === goalToFund.id
-                    ? {
-                        ...goal,
-                        currentAmount: Math.min(goal.targetAmount, goal.currentAmount + amount)
-                      }
-                    : goal
-            ));
+            const newSaved = Math.min(goalToFund.summ, goalToFund.saved + amount);
+
+            const updateData: GoalUpdate = {
+                saved: newSaved,
+            };
+
+            await dispatch(updateGoal({
+                id: goalToFund.id_,
+                data: updateData
+            }));
+
             setIsFundModalOpen(false);
             setGoalToFund(null);
         }
     };
+
+    // Transform goals to match the component's expected format
+    const transformedGoals = goals.map(goal => ({
+        id: goal.id_,
+        name: goal.name,
+        targetAmount: goal.summ,
+        currentAmount: goal.saved,
+        dateAdded: new Date().toISOString().slice(0, 10), // You might want to add this field to backend
+    }));
 
     return (
         <Box className="goals-container">
@@ -70,19 +88,35 @@ const Goals = () => {
                 </Typography>
                 <Button
                     variant="contained"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddIcon/>}
                     onClick={() => setIsAddModalOpen(true)}
                     className="add-goal-button"
+                    disabled={loading}
                 >
                     Add New Goal
                 </Button>
             </Box>
 
-            <GoalList
-                goals={goals}
-                onDelete={handleDeleteGoal}
-                onFundOpen={handleOpenFundModal}
-            />
+            {error && (
+                <Alert severity="error" sx={{mb: 2}}>
+                    {error}
+                </Alert>
+            )}
+
+            {loading && goals.length === 0 ? (
+                <Box display="flex" justifyContent="center" my={4}>
+                    <CircularProgress/>
+                </Box>
+            ) : (
+                <GoalList
+                    goals={transformedGoals}
+                    onDelete={handleDeleteGoal}
+                    onFundOpen={(goal) => {
+                        const originalGoal = goals.find(g => g.id_ === goal.id);
+                        if (originalGoal) handleOpenFundModal(originalGoal);
+                    }}
+                />
+            )}
 
             <AddGoalModal
                 isOpen={isAddModalOpen}
@@ -97,7 +131,7 @@ const Goals = () => {
             <FundGoalModal
                 isOpen={isFundModalOpen}
                 onClose={() => setIsFundModalOpen(false)}
-                goalToFund={goalToFund}
+                goalToFund={goalToFund ? goalToFund : null}
                 fundAmount={fundAmount}
                 setFundAmount={setFundAmount}
                 onFundGoal={handleFundGoal}
