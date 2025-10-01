@@ -325,7 +325,10 @@ const Dashboard = () => {
                   </Typography>
                   <IconButton
                     className="delete-button"
-                    onClick={() => handleDeleteClick(transaction.id_, transaction.category_name)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(transaction.id_, transaction.category_name);
+                    }}
                     size="small"
                     sx={{
                       ml: 1,
