@@ -52,7 +52,7 @@ const CURRENCIES = Object.keys(CURRENCY_SYMBOLS);
 
 const Profile: React.FC = () => {
     const dispatch = useAppDispatch();
-    const {user, loading} = useAppSelector((state) => state.auth);
+    const {user} = useAppSelector((state) => state.auth);
 
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [isEditingCurrency, setIsEditingCurrency] = useState(false);
@@ -327,12 +327,10 @@ const Profile: React.FC = () => {
                                                         onChange={(e) => setNewUsername(e.target.value)}
                                                         fullWidth
                                                         autoFocus
-                                                        disabled={loading}
                                                         sx={{'& .MuiOutlinedInput-root': {borderRadius: 1.5}}}
                                                     />
                                                     <IconButton
                                                         onClick={handleSaveUsername}
-                                                        disabled={loading}
                                                         size="small"
                                                         sx={{
                                                             bgcolor: 'primary.main',
@@ -348,7 +346,6 @@ const Profile: React.FC = () => {
                                                             setIsEditingUsername(false);
                                                             setNewUsername(user?.username || '');
                                                         }}
-                                                        disabled={loading}
                                                     >
                                                         <CloseIcon fontSize="small"/>
                                                     </IconButton>
@@ -451,7 +448,6 @@ const Profile: React.FC = () => {
                                                         <Select
                                                             value={newCurrency}
                                                             onChange={(e) => setNewCurrency(e.target.value)}
-                                                            disabled={loading}
                                                             sx={{borderRadius: 1.5}}
                                                         >
                                                             {CURRENCIES.map((currency) => (
@@ -463,7 +459,6 @@ const Profile: React.FC = () => {
                                                     </FormControl>
                                                     <IconButton
                                                         onClick={handleSaveCurrency}
-                                                        disabled={loading}
                                                         size="small"
                                                         sx={{
                                                             bgcolor: 'primary.main',
@@ -479,7 +474,6 @@ const Profile: React.FC = () => {
                                                             setIsEditingCurrency(false);
                                                             setNewCurrency(user?.default_currency || 'USD');
                                                         }}
-                                                        disabled={loading}
                                                     >
                                                         <CloseIcon fontSize="small"/>
                                                     </IconButton>
