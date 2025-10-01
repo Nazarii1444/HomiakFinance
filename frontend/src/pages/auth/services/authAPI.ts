@@ -1,5 +1,5 @@
 // services/authAPI.ts
-import type { LoginRequest, RegisterRequest, LoginResponse, TokenPair, User } from '../types/types';
+import type { LoginRequest, RegisterRequest, LoginResponse, TokenPair } from '../types/types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -59,12 +59,6 @@ class AuthAPI {
     return this.request<TokenPair>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(userData),
-    });
-  }
-
-  async getUserProfile(): Promise<User> {
-    return this.request<User>('/users/me', {
-      method: 'GET',
     });
   }
 }
