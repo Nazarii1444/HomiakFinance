@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_PATH,
     JWT_ACCESS_COOKIE_NAME,
     JWT_REFRESH_COOKIE_NAME
 )
@@ -41,6 +40,20 @@ async def google_callback(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
+    """
+    Response example
+    {
+      "message": "Signed in with Google",
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsInVzZXJuYW1lIjoicm9zYWthMTQyOSIsImV4cCI6MTc1OTA4MjA2NH0.o9srHWLPNDsL2FY0b9S-rtezuknus3zlvlWBgevFg_Q",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsImV4cCI6MTc2MTY2Njg2NH0.wH2uNM0MUaOaIW4X7go-9X31hBy3kKY5S9J6GryPxqI",
+      "token_type": "bearer",
+      "user_id": 1,
+      "email": "user1@example.com",
+      "name": "Vitalii Yatskiv",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocL-l2MBdKSbsG6mlh1V_Teng9vUhVy_BnsIAiDbGTPL4jE0LD0=s96-c"
+    }
+    """
+
     token = await oauth.google.authorize_access_token(request)
     if not token:
         return JSONResponse(status_code=400, content={"detail": "Token exchange failed"})
@@ -94,18 +107,3 @@ async def google_callback(
     # return RedirectResponse(url=FRONTEND_SUCCESS_URL, status_code=302)
 
     return resp
-
-
-"""
-example
-{
-  "message": "Signed in with Google",
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsInVzZXJuYW1lIjoicm9zYWthMTQyOSIsImV4cCI6MTc1OTA4MjA2NH0.o9srHWLPNDsL2FY0b9S-rtezuknus3zlvlWBgevFg_Q",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsImV4cCI6MTc2MTY2Njg2NH0.wH2uNM0MUaOaIW4X7go-9X31hBy3kKY5S9J6GryPxqI",
-  "token_type": "bearer",
-  "user_id": 16,
-  "email": "rosaka1429@gmail.com",
-  "name": "Nazarii Protskiv",
-  "picture": "https://lh3.googleusercontent.com/a/ACg8ocL-l2MBdKSbsG6mlh1V_Teng9vUhVy_BnsIAiDbGTPL4jE0LD0=s96-c"
-}
-"""

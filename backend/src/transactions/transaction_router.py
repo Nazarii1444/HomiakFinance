@@ -62,6 +62,7 @@ async def create_transaction(
 ):
     values = {
         "user_id": current_user.id_,
+        "name": payload.name,
         "amount": payload.amount,
         "kind": payload.kind,
         "category_name": payload.category_name,
@@ -81,6 +82,7 @@ async def create_transaction(
     await session.refresh(current_user)
     return {
         "id_": tx.id_,
+        "name": tx.name,
         "amount": tx.amount,
         "kind": tx.kind,
         "category_name": tx.category_name,
@@ -166,6 +168,7 @@ async def delete_transaction(
         "message": "Transaction has been deleted",
         "id_": tx.id_,
         "amount": tx.amount,
+        "name": tx.name,
         "kind": tx.kind,
         "category_name": tx.category_name,
         "currency": tx.currency,

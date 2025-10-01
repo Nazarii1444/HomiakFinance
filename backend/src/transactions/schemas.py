@@ -10,6 +10,7 @@ Money = condecimal(max_digits=14, decimal_places=2, ge=0)
 
 class TransactionCreate(BaseModel):
     amount: Money
+    name: str
     kind: TransactionKind = TransactionKind.EXPENSE
     category_name: str = Field(min_length=1, max_length=64)
     currency: Optional[str] = Field(default=None, max_length=16)
@@ -18,6 +19,7 @@ class TransactionCreate(BaseModel):
 
 class TransactionUpdate(BaseModel):
     amount: Optional[Money] = None
+    name: Optional[str] = None
     kind: Optional[Union[int, TransactionKind]] = None
     category_name: Optional[str] = Field(default=None, min_length=1, max_length=64)
     currency: Optional[str] = Field(default=None, max_length=16)
@@ -26,6 +28,8 @@ class TransactionUpdate(BaseModel):
 
 class TransactionOut(BaseModel):
     id_: int
+    name: str
+    amount: Money
     amount: Decimal
     kind: TransactionKind
     category_name: str

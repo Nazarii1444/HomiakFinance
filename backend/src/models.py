@@ -71,6 +71,7 @@ class Transaction(Base):
     id_ = Column(Integer, primary_key=True, autoincrement=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id_", ondelete="CASCADE"), nullable=False)
     amount = Column(Numeric(14, 2), nullable=False)
+    name = Column(String(64), nullable=False, default="")
     kind = Column(Enum(TransactionKind), nullable=False, default=TransactionKind.EXPENSE)
     category_name = Column(String(64), nullable=False)
     currency = Column(String(16), nullable=True)

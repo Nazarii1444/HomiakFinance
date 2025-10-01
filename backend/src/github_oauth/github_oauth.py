@@ -46,6 +46,16 @@ async def github_callback(
         request: Request,
         db: AsyncSession = Depends(get_db),
 ):
+    """
+        "message": "Signed in with GitHub",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsInVzZXJuYW1lIjoiTmF6YXJpaTE0NDQiLCJleHAiOjE3NTkwODI5OTh9.NCMe0Vxjm53G61Iip_npuzzBuEuJzw_s0rcMgmQaGqI",
+        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsImV4cCI6MTc2MTY2Nzc5OH0.hYfyv-YhMtqz--od_gGFlWtJB7yUb5Bwx5__pHXrEZQ",
+        "token_type": "bearer",
+        "user_id": 1,
+        "login": "Vitalik2705",
+        "name": "Vitalii Yatskiv",
+        "avatar_url": "https://avatars.githubusercontent.com/u/171423267?v=4"
+    """
     token = await oauth.github.authorize_access_token(request)
     if not token:
         return JSONResponse(status_code=400, content={"detail": "Token exchange failed"})
@@ -110,15 +120,3 @@ async def github_callback(
     # return RedirectResponse(url=FRONTEND_SUCCESS_URL, status_code=302)
 
     return resp
-
-
-"""
-  "message": "Signed in with GitHub",
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsInVzZXJuYW1lIjoiTmF6YXJpaTE0NDQiLCJleHAiOjE3NTkwODI5OTh9.NCMe0Vxjm53G61Iip_npuzzBuEuJzw_s0rcMgmQaGqI",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNiIsImV4cCI6MTc2MTY2Nzc5OH0.hYfyv-YhMtqz--od_gGFlWtJB7yUb5Bwx5__pHXrEZQ",
-  "token_type": "bearer",
-  "user_id": 16,
-  "login": "Nazarii1444",
-  "name": "Nazarii Protskiv",
-  "avatar_url": "https://avatars.githubusercontent.com/u/171423267?v=4"
-"""
