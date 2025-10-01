@@ -31,7 +31,7 @@ class TransactionOut(BaseModel):
     category_name: str
     currency: Optional[str]
     date: datetime
-    new_capital: Optional[float]
+    new_capital: Optional[float] = None
 
     class Config:
         from_attributes = True
