@@ -40,9 +40,11 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { fetchTransactions, clearError, deleteTransaction } from '../../../store/slices/transactionSlice';
+import { fetchTransactions, clearError, updateTransaction, deleteTransaction } from '../../../store/slices/transactionSlice';
 import '../styles/Dashboard.scss';
 import {TransactionKind} from "../types/transactionKind.ts";
+import ViewModal from './ViewModal.tsx';
+import type {TransactionUpdate} from "../types/types.ts";
 
 const categoryIcons: { [key: string]: React.ReactElement } = {
   shopping: <ShoppingIcon />,
@@ -192,6 +194,33 @@ const Dashboard = () => {
     });
   };
 
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleTransactionClick = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleSaveTransaction = async (id: number, data: TransactionUpdate) => {
+    try {
+      // Викликаємо thunk
+      const updatedTransaction = await dispatch(
+        updateTransaction({ id, data })
+      ).unwrap();
+
+      console.log('Transaction updated successfully:', updatedTransaction);
+
+    } catch (err) {
+      console.error('Failed to update transaction:', err);
+    }
+  };
+
   // Pagination logic
   const totalPages = Math.ceil(transactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -275,6 +304,7 @@ const Dashboard = () => {
                 <ListItem
                   key={transaction.id_}
                   className="transaction-item"
+                  onClick={() => handleTransactionClick(transaction)}
                   sx={{
                     '&:hover .delete-button': {
                       opacity: 1
@@ -362,6 +392,14 @@ const Dashboard = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ViewModal
+        open={isModalOpen}
+        transaction={selectedTransaction}
+        onClose={handleModalClose}
+        onSave={handleSaveTransaction}
+      />
+
     </>
   );
 };
