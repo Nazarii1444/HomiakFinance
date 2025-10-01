@@ -9,6 +9,7 @@ from src.database import get_db
 from src.dependencies import get_current_user
 from src.models import Transaction, TransactionKind, User
 from src.transactions.schemas import TransactionOut, TransactionCreate, TransactionUpdate
+from src.transactions.currency_converter import convert_to_user_currency
 
 ALLOWED_EXPENSES_CATEGORIES = [
     "shopping",
@@ -69,11 +70,24 @@ async def create_transaction(
     if payload.date is not None:
         values["date"] = payload.date
 
+    default_currency = current_user.default_currency
+    val = await convert_to_user_currency(session, default_currency, payload.kind, payload.amount, payload.currency)
+    current_user.capital = round(float(current_user.capital) + float(val), 2)
+
     tx = Transaction(**values)
     session.add(tx)
     await session.commit()
     await session.refresh(tx)
-    return tx
+    await session.refresh(current_user)
+    return {
+        "id_": tx.id_,
+        "amount": tx.amount,
+        "kind": tx.kind,
+        "category_name": tx.category_name,
+        "currency": tx.currency,
+        "date": tx.date,
+        "new_capital": current_user.capital
+    }
 
 
 @transaction_router.patch("/{tx_id}", response_model=TransactionOut, status_code=status.HTTP_200_OK)
@@ -127,7 +141,7 @@ async def get_transaction_by_id(
     return tx
 
 
-@transaction_router.delete("/{tx_id}", status_code=status.HTTP_204_NO_CONTENT)
+@transaction_router.delete("/{tx_id}", status_code=status.HTTP_200_OK)
 async def delete_transaction(
         tx_id: int,
         session: AsyncSession = Depends(get_db),
@@ -141,9 +155,23 @@ async def delete_transaction(
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
+    default_currency = current_user.default_currency
+    val = await convert_to_user_currency(session, default_currency, tx.kind, tx.amount, tx.currency)
+    current_user.capital = round(float(current_user.capital) - float(val), 2)
+
     await session.delete(tx)
     await session.commit()
-    return
+    await session.refresh(current_user)
+    return {
+        "message": "Transaction has been deleted",
+        "id_": tx.id_,
+        "amount": tx.amount,
+        "kind": tx.kind,
+        "category_name": tx.category_name,
+        "currency": tx.currency,
+        "date": tx.date,
+        "new_capital": current_user.capital
+    }
 
 
 @transaction_router.get("", response_model=List[TransactionOut], status_code=status.HTTP_200_OK)
