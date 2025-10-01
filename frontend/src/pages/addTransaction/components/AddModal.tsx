@@ -30,7 +30,9 @@ import {
   MoreHoriz as OtherIcon,
   Fastfood as DiningIcon,
   LocalHospital as HealthIcon,
-  FitnessCenter as SportsIcon
+  FitnessCenter as SportsIcon,
+  Phone as PhoneIcon,
+  Checkroom as ClothingIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { createTransaction, clearError } from '../../../store/slices/transactionSlice';
@@ -67,8 +69,8 @@ const EXPENSE_CATEGORIES: CategoryItem[] = [
   { name: 'education', icon: <EducationIcon /> },
   { name: 'beauty', icon: <BeautyIcon /> },
   { name: 'sports', icon: <SportsIcon /> },
-  { name: 'phone', icon: <OtherIcon /> },
-  { name: 'clothing', icon: <OtherIcon /> },
+  { name: 'phone', icon: <PhoneIcon /> },
+  { name: 'clothing', icon: <ClothingIcon /> },
 ];
 
 const INCOME_CATEGORIES: CategoryItem[] = [
@@ -88,12 +90,18 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.transactions);
 
+  const [name, setName] = useState('');
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [amountError, setAmountError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]); // YYYY-MM-DD
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
 
   const handleTypeChange = (newType: 'expense' | 'income') => {
     setType(newType);
@@ -124,6 +132,10 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
     return CURRENCIES.find(curr => curr.code === currency) || CURRENCIES[0];
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDate(e.target.value);
+  };
+
   const handleSubmit = async () => {
     let hasErrors = false;
 
@@ -145,16 +157,18 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
 
     try {
       const transactionData = {
+        // name: name,
         amount: parseFloat(amount),
         kind: type === 'expense' ? TransactionKind.EXPENSE : TransactionKind.INCOME,
         category_name: category,
         currency: currency,
-        date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+        date: date,
       };
 
       await dispatch(createTransaction(transactionData)).unwrap();
 
       // Reset form and close modal on success
+      setName('');
       setType('expense');
       setCategory('');
       setAmount('');
@@ -170,6 +184,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
 
   const handleClose = () => {
     // Reset form when closing
+    setName('');
     setType('expense');
     setCategory('');
     setAmount('');
@@ -209,6 +224,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
             borderBottom: `2px solid ${getHighlightColor()}`,
             pb: 2,
             mb: 3,
+            textAlign: 'center',
           }}
         >
           Add Transaction
@@ -219,6 +235,18 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
             {error}
           </Alert>
         )}
+
+        {/* Title Field */}
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            label="Transaction Name"
+            variant="outlined"
+            value={name}
+            onChange={handleNameChange}
+            disabled={loading}
+          />
+        </Box>
 
         <Box className="type-toggles" sx={{ display: 'flex', gap: 1, mb: 3 }}>
           <Button
@@ -342,6 +370,19 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
               ))}
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Date Field */}
+        <Box sx={{ mb: 4 }}>
+          <TextField
+            label="Transaction Date"
+            type="date"
+            fullWidth
+            value={date}
+            onChange={handleDateChange}
+            InputLabelProps={{ shrink: true }}
+            disabled={loading}
+          />
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
