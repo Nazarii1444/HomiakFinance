@@ -89,12 +89,13 @@ interface AddModalProps {
 const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.transactions);
+  const {user} = useAppSelector((state) => state.auth);
 
   const [name, setName] = useState('');
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState(user?.default_currency || "USD");
   const [amountError, setAmountError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]); // YYYY-MM-DD
@@ -157,7 +158,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
 
     try {
       const transactionData = {
-        // name: name,
+        name: name,
         amount: parseFloat(amount),
         kind: type === 'expense' ? TransactionKind.EXPENSE : TransactionKind.INCOME,
         category_name: category,
@@ -172,7 +173,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
       setType('expense');
       setCategory('');
       setAmount('');
-      setCurrency('USD');
+      setCurrency(user?.default_currency || "USD");
       setAmountError(false);
       setCategoryError(false);
       onClose();
@@ -188,7 +189,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose }) => {
     setType('expense');
     setCategory('');
     setAmount('');
-    setCurrency('USD');
+    setCurrency(user?.default_currency || "USD");
     setAmountError(false);
     setCategoryError(false);
     dispatch(clearError());
