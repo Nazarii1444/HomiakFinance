@@ -79,7 +79,13 @@ Appendix B: Аналіз моделі
 ## 2. Загальний опис  
 ### 2.1 Перспектива продукту  
 Продукт — веб-додаток із SPA-фронтендом + бекенд API.
-Джерело курсів валют — API Національного Банку України. 
+<br> Архітектура: Клієнт–сервер, SPA + Monolithic REST API.
+<br> Frontend: React (TypeScript), React Router, axios.
+<br> Backend: FastAPI (Python), Uvicorn, SQLAlchemy/Pydantic, JWT.
+<br> База даних: PostgreSQL.
+<br> Передача даних: HTTPS, JSON.
+
+<br>  Джерело курсів валют — API Національного Банку України. 
 Платформа повинна інтегруватися з провайдером push/email-нотифікацій (gmail).
 
 ### 2.2 Основні функції продукту  
