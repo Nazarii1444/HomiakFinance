@@ -15,7 +15,7 @@
     User->>API: GET /confirm?token=abc123
     API->>DB: Update user (status=active)
 
-    <img width="975" height="421" alt="image" src="https://github.com/user-attachments/assets/b4c6456c-4d7a-440e-88fc-30e96d6209bc" />
+<img width="975" height="421" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_11-54-47.jpg" />
 
 ###2. Оновлення курсів валют:
 
