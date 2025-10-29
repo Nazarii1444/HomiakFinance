@@ -35,7 +35,7 @@
     end
     FXService->>Logger: Write update summary
 
-    <img width="953" height="521" alt="image" src="https://github.com/user-attachments/assets/d5055901-5b48-458a-9029-e4bb6c123e62" />
+<img width="953" height="521" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-32-46.jpg" />
 
 ###3. Додавання транзакції з перерахунком валют:
 
@@ -54,7 +54,7 @@
     API->>DB: Update transaction (final sum in UAH)
     API-->>User: Return "Transaction saved"
 
-    <img width="959" height="429" alt="image" src="https://github.com/user-attachments/assets/32316a9e-5dca-4c53-b5c3-cf27bf29bd87" />
+<img width="959" height="429" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-33-15.jpg" />
 
 ###4. Сповіщення про дедлайн:
 
@@ -73,7 +73,7 @@
     EmailWorker->>User: Send email
     SMSWorker->>User: Send SMS
 
-    <img width="967" height="401" alt="image" src="https://github.com/user-attachments/assets/2c72eb79-6f8a-4cd3-bd19-df28ac31d887" />
+<img width="967" height="401" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-33-35.jpg" />
 
 ###5. Побудова аналітики:
 
@@ -92,7 +92,7 @@
     end
     AnalyticsAPI-->>User: Return JSON report
 
-    <img width="948" height="593" alt="image" src="https://github.com/user-attachments/assets/576b529f-35d5-425c-b2d7-5c14a7640018" />
+<img width="948" height="593" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-34-05.jpg" />
 
 
 
