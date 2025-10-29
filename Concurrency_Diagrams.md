@@ -1,4 +1,5 @@
-###1. Реєстрація користувача:
+---
+### 1. Реєстрація користувача:
 
     sequenceDiagram
     participant User
@@ -20,7 +21,7 @@
 Pattern: Event-driven + Asynchronous Queue
 Надсилання email не блокує основний потік — обробляється фоновим сервісом через чергу.
 
-###2. Оновлення курсів валют:
+### 2. Оновлення курсів валют:
 
     sequenceDiagram
     participant Scheduler
@@ -43,7 +44,7 @@ Pattern: Event-driven + Asynchronous Queue
 Pattern: Scheduled Worker + Parallel update
 Сервіс запускається по таймеру і оновлює курси одночасно для кількох валют.
 
-###3. Додавання транзакції з перерахунком валют:
+### 3. Додавання транзакції з перерахунком валют:
 
     sequenceDiagram
     participant User
@@ -65,7 +66,7 @@ Pattern: Scheduled Worker + Parallel update
 Pattern: Parallel external calls
 Запит на курс і запис транзакції виконуються одночасно для зменшення затримки.
 
-###4. Сповіщення про дедлайн:
+### 4. Сповіщення про дедлайн:
 
     sequenceDiagram
     participant GoalService
@@ -87,7 +88,7 @@ Pattern: Parallel external calls
 Pattern: Publish/Subscribe
 Подія дедлайну розсилається одночасно кільком сервісам-споживачам (email, SMS).
 
-###5. Побудова аналітики:
+### 5. Побудова аналітики:
 
     sequenceDiagram
     participant User
@@ -109,4 +110,4 @@ Pattern: Publish/Subscribe
 Pattern: CQRS + Cache-aside
 Читання аналітики відділене від транзакційної бази для масштабування і швидкодії.
 
-
+---
