@@ -232,7 +232,7 @@ Appendix B: Аналіз моделі
 (додати інші терміни за потреби)
 
 ## Appendix B: Аналіз моделі  
-
+- [Sequence diagrams](https://github.com/Nazarii1444/HomiakFinance/blob/main/Concurrency_Diagrams.md)
 
 ---
 
