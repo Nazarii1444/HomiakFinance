@@ -17,6 +17,9 @@
 
 <img width="975" height="421" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_11-54-47.jpg" />
 
+Pattern: Event-driven + Asynchronous Queue
+Надсилання email не блокує основний потік — обробляється фоновим сервісом через чергу.
+
 ###2. Оновлення курсів валют:
 
     sequenceDiagram
@@ -37,6 +40,9 @@
 
 <img width="953" height="521" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-32-46.jpg" />
 
+Pattern: Scheduled Worker + Parallel update
+Сервіс запускається по таймеру і оновлює курси одночасно для кількох валют.
+
 ###3. Додавання транзакції з перерахунком валют:
 
     sequenceDiagram
@@ -55,6 +61,9 @@
     API-->>User: Return "Transaction saved"
 
 <img width="959" height="429" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-33-15.jpg" />
+
+Pattern: Parallel external calls
+Запит на курс і запис транзакції виконуються одночасно для зменшення затримки.
 
 ###4. Сповіщення про дедлайн:
 
@@ -75,6 +84,9 @@
 
 <img width="967" height="401" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-33-35.jpg" />
 
+Pattern: Publish/Subscribe
+Подія дедлайну розсилається одночасно кільком сервісам-споживачам (email, SMS).
+
 ###5. Побудова аналітики:
 
     sequenceDiagram
@@ -94,5 +106,7 @@
 
 <img width="948" height="593" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-10-29_01-34-05.jpg" />
 
+Pattern: CQRS + Cache-aside
+Читання аналітики відділене від транзакційної бази для масштабування і швидкодії.
 
 
