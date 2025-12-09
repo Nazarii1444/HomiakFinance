@@ -88,18 +88,18 @@
 
 ---
 
-## Як threat-model міг би виглядати для двох флоу
+## threat-model для двох флоу
 
 ### Флоу 1 — Аутентифікація / сесія
 
-* **Входження / Верифікація** → **Генерація токена / сесії** → **Передача токена клієнту (cookie / token)** → **Подальші запити з токеном**
+* **Log in / Верифікація** → **Генерація токена** → **Передача токена клієнту** → **Подальші запити з токеном**
 
   * Загрози: credentials theft, brute–force, session hijacking, weak password, token replay, insecure transport.
   * Mitigations: TLS, strong password policy, rate-limit + lockout, secure token generation, HttpOnly / Secure cookies, session timeout, MFA.
 
-### Флоу 2 — Операції з фінансовими / чутливими даними
+### Флоу 2 — Операції з фінансовими даними
 
-* **Запит користувача (через UI або API) з токеном** → **Авторизація / Перевірка прав** → **Валідація/санітизація введених даних** → **Операція з БД (зміна балансу / створення транзакції / CRUD / читання даних)** → **Відправка відповіді / підтвердження**
+* **Запит користувача (через UI) з токеном** → **Авторизація / Перевірка прав** → **Валідація введених даних** → **Операція з БД** → **Відправка відповіді**
 
   * Загрози: broken access control, injection, data leakage, business-logic abuse, CSRF, weak data encryption, missing audit, dependency vulnerabilities.
   * Mitigations: access control checks, parameterized queries, input validation, encryption at rest/in transit, CSRF protection, logging/audit, business-logic safeguards (limits, confirmation), secure dependencies, config/secrets management.
