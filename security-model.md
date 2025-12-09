@@ -105,13 +105,3 @@
   * Mitigations: access control checks, parameterized queries, input validation, encryption at rest/in transit, CSRF protection, logging/audit, business-logic safeguards (limits, confirmation), secure dependencies, config/secrets management.
 
 ---
-
-## Коментар щодо специфіки HomiakFinance / висновки та рекомендації
-
-* Я не побачив у SRS (або при огляді репозиторію) докладного опису безпекових механізмів (authentication, authorization, шифрування, контроль доступу) — отже реалізація цих моментів може залишатися невизначеною або “на потім”. Це значний ризик для фінансового застосунку.
-* Якщо HomiakFinance планується як серйозний фінансовий продукт — рекомендую зробити **повний threat modeling** (наприклад, з використанням підходів як STRIDE або більш сучасних, або навіть комбінований з бізнес-логікою), і **Security Review / аудит коду** до запуску.
-* Також бажано — документувати політики безпеки: паролі, сесії, обробка даних, ведення логів, оновлення залежностей, реагування на інциденти.
-
----
-
-Якщо хочеш — можу **зробити повний threat model** для HomiakFinance — окремо для **backend**, **database**, **frontend (якщо є)**, і **deployment/інфраструктури**. Це дасть набагато ширшу картину. Хочеш так?
