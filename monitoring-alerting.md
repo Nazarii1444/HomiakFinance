@@ -13,24 +13,11 @@
     <tr><td>5</td><td>DB connections used</td><td>Використання пулу з’єднань</td><td>db_instance, app_service</td><td>PostgreSQL, app pods</td><td>PG exporter (pg_stat_activity)</td></tr>
     <tr><td>6</td><td>DB slow queries</td><td>К-сть повільних запитів &gt; t</td><td>query_signature, db_instance</td><td>PostgreSQL</td><td>PG slow query log → exporter</td></tr>
     <tr><td>7</td><td>Cache hit ratio</td><td>Частка попадань у кеш</td><td>cache_cluster, app_service</td><td>Redis/Memcached</td><td>Redis exporter</td></tr>
-    <tr><td>8</td><td>Queue backlog / lag</td><td>Повідомлень у черзі / затримка</td><td>queue_name, consumer_group</td><td>RabbitMQ/Kafka/SQS</td><td>Queue exporters / cloud metrics</td></tr>
-    <tr><td>9</td><td>Worker job success rate</td><td>Успішність фонових задач</td><td>job_type, worker_group, region</td><td>Worker pods, queues</td><td>App counters → Prometheus</td></tr>
-    <tr><td>10</td><td>Worker job duration p95</td><td>Тривалість задач</td><td>job_type, worker_group</td><td>Worker pods</td><td>App histograms</td></tr>
-    <tr><td>11</td><td>FX refresh success rate</td><td>Успішність оновлення курсів</td><td>job_type=fx_refresh, provider</td><td>Worker pods, outbound API</td><td>App metrics; log-to-metrics</td></tr>
-    <tr><td>12</td><td>Notification delivery rate</td><td>Доставлено/відправлено</td><td>channel, event_type, region</td><td>Worker pods, email provider</td><td>App metrics; provider webhooks</td></tr>
+    <tr><td>8</td><td>Worker job duration p95</td><td>Тривалість задач</td><td>job_type, worker_group</td><td>Worker pods</td><td>App histograms</td></tr>
+    <tr><td>9</td><td>FX refresh success rate</td><td>Успішність оновлення курсів</td><td>job_type=fx_refresh, provider</td><td>Worker pods, outbound API</td><td>App metrics; log-to-metrics</td></tr>
+    <tr><td>10</td><td>Notification delivery rate</td><td>Доставлено/відправлено</td><td>channel, event_type, region</td><td>Worker pods, email provider</td><td>App metrics; provider webhooks</td></tr>
   </tbody>
 </table>
-
-<h3>Пояснення збору</h3>
-<ul>
-  <li>APM/Tracing: OpenTelemetry SDK → OTLP колектор → Prometheus/Grafana.</li>
-  <li>Ingress/LB: метрики Nginx/Ingress/ALB.</li>
-  <li>БД: postgres exporter (pg_stat_*), slow query log; CPU/IO — cloud metrics.</li>
-  <li>Кеш: Redis/Memcached exporter.</li>
-  <li>Черги: RabbitMQ/Kafka exporters або SQS cloud metrics.</li>
-  <li>App custom: лічильники успіх/помилка, гістограми тривалості job/endpoint, log-to-metrics для FX.</li>
-  <li>Дашборди: Grafana; ретенція сирих метрик ≥14–30 днів.</li>
-</ul>
 
 <h2>Alerting — пороги, критичність, план дій</h2>
 <table>
@@ -44,15 +31,7 @@
     <tr><td>2</td><td>API 5xx error rate &gt; 2% (5 хв)</td><td>Critical (Prod)</td><td>max 2%</td><td>Ролбек; перевірити залежності (DB/cache/queues); включити feature-flag fallback.</td></tr>
     <tr><td>3</td><td>DB CPU &gt; 85% (10 хв)</td><td>High</td><td>max 85%</td><td>Перевірити slow queries; scale up/replica; додати індекси/кеш.</td></tr>
     <tr><td>4</td><td>DB connections used &gt; 80% пулу (5 хв)</td><td>High</td><td>max 80%</td><td>Зменшити concurrency; перевірити connection leak; pgbouncer; збільшити пул.</td></tr>
-    <tr><td>5</td><td>Queue backlog &gt; X або lag &gt; 2 хв (10 хв)</td><td>High</td><td>max X / 2 хв</td><td>Додати воркерів; перевірити DLQ; масштабувати брокер; стопити шумних продюсерів.</td></tr>
-    <tr><td>6</td><td>FX refresh success rate &lt; 99% (1 год)</td><td>Medium</td><td>min 99%</td><td>Переключити провайдера; повторити job; використати останній валідний курс; перевірити outbound мережу.</td></tr>
-    <tr><td>7</td><td>Notification delivery rate &lt; 95% (30 хв)</td><td>Medium</td><td>min 95%</td><td>Перевірити провайдера; ретраї; fallback канал; знизити обсяг; перевірити чергу листів.</td></tr>
+    <tr><td>5</td><td>FX refresh success rate &lt; 99% (1 год)</td><td>Medium</td><td>min 99%</td><td>Переключити провайдера; повторити job; використати останній валідний курс; перевірити outbound мережу.</td></tr>
+    <tr><td>6</td><td>Notification delivery rate &lt; 95% (30 хв)</td><td>Medium</td><td>min 95%</td><td>Перевірити провайдера; ретраї; fallback канал; знизити обсяг; перевірити чергу листів.</td></tr>
   </tbody>
 </table>
-
-<h3>Як робити алерти</h3>
-<ul>
-  <li>Prometheus alert rules (або CloudWatch/Stackdriver alarms) → Alertmanager → Slack/PagerDuty.</li>
-  <li>Етикетки: severity, service, region, runbook URL; дедуплікація й сілєнс на планові роботи.</li>
-  <li>Для критичних — обов’язковий runbook: перевірки (health, логи, трейси), команди scale/rollback, контакти SRE/DBA.</li>
-</ul>
