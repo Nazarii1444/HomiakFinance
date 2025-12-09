@@ -10,8 +10,6 @@
 
 * **Log in / Верифікація** → **Генерація токена** → **Передача токена клієнту** → **Подальші запити з токеном**
 
-  * Загрози: credentials theft, brute–force, session hijacking, weak password, token replay, insecure transport.
-  * Mitigations: TLS, strong password policy, rate-limit + lockout, secure token generation, HttpOnly / Secure cookies, session timeout, MFA.
  
 | №  | Загроза / Ризик                                                                                        | Як може проявитися / на який флоу впливає                                                                                                                                                                   |
 | -- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -45,8 +43,6 @@
 
 * **Запит користувача (через UI) з токеном** → **Авторизація / Перевірка прав** → **Валідація введених даних** → **Операція з БД** → **Відправка відповіді**
 
-  * Загрози: broken access control, injection, data leakage, business-logic abuse, CSRF, weak data encryption, missing audit, dependency vulnerabilities.
-  * Mitigations: access control checks, parameterized queries, input validation, encryption at rest/in transit, CSRF protection, logging/audit, business-logic safeguards (limits, confirmation), secure dependencies, config/secrets management.
 
 | №  | Загроза / Ризик                                                                                        | Як може проявитися / на який флоу впливає                                                                                                                                                                   |
 | -- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
