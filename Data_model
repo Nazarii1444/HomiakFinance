@@ -1,0 +1,14 @@
+
+1. User
+
+Поля: id_user, login, email (unique), pwd_hash, def_curr, timezone, all_money
+Індекси: id_user
+Обмеження:
+Використання: 
+
+2. User
+
+Поля: 
+Індекси:
+Обмеження:
+Використання: 
