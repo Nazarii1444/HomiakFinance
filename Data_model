@@ -1,13 +1,13 @@
 <img width="975" height="421" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-12-10_11-58-54.jpg" />
 
-1. User
+### 1. User
 
 Поля: id_user, login, email (unique), pwd_hash, def_curr, timezone, all_money
 Індекси: id_user
 Обмеження:
 Використання: 
 
-2. User
+### 2. User
 
 Поля: 
 Індекси:
