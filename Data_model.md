@@ -1,4 +1,4 @@
-<img width="975" height="621" alt="image" src="[https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-12-10_11-58-54.jpg](https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-12-10_12-31-47.jpg)" />
+<img width="975" height="621" alt="image" src="https://github.com/Nazarii1444/HomiakFinance/blob/main/photo_2025-12-10_12-31-47.jpg" />
 
 ### 1. User
 
