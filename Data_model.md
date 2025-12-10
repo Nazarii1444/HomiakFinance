@@ -82,8 +82,8 @@
 
 ### 3. Streaming 
 створення Transaction
-перевірка цілей  
-генерація сповіщення 
+перевірка цілей
+генерація сповіщення
 Event-driven logic
 
 ### 4. Consistency 
