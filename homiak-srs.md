@@ -243,6 +243,14 @@ Usecase діаграма:
 ## Appendix B: Аналіз моделі  
 - [Sequence diagrams](https://github.com/Nazarii1444/HomiakFinance/blob/main/Concurrency_Diagrams.md)
 
+Check 2:
+- [Data model](https://github.com/Nazarii1444/HomiakFinance/blob/main/Data_model.md)
+- [Resiliency model]()
+- [Security model](https://github.com/Nazarii1444/HomiakFinance/blob/main/security-model.md)
+- [Deployment model](https://github.com/Nazarii1444/HomiakFinance/blob/main/infrastructure.md)
+- [Analytics model](https://github.com/Nazarii1444/HomiakFinance/blob/main/metrics-funnels.md) 
+- [Monitoring&alerting model](https://github.com/Nazarii1444/HomiakFinance/blob/main/monitoring-alerting.md) 
+
 ---
 
 **Revision History**  
