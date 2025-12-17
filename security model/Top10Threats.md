@@ -1,5 +1,5 @@
 ## Модель безпеки
-### 10 найкритичніших загроз з файлу:
+### 10 найкритичніших загроз з файлу [ThreatModelReport.htm](https://github.com/Nazarii1444/HomiakFinance/blob/main/security%20model/ThreatModelReport.htm):
 
 2. An adversary can gain access to sensitive information from an API through error messages [State: Planned]
 
