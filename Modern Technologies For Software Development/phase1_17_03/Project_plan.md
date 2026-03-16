@@ -75,35 +75,7 @@ gantt
 
 ---
 
-# 4. Resource Management
-
-## Responsibilities
-
-**Tech Lead**
-
-- архітектура системи
-- код-ревʼю
-- технічні рішення
-
-**Backend Engineers**
-
-- API
-- база даних
-- бізнес логіка
-
-**Frontend Engineer**
-
-- інтерфейс користувача
-- інтеграція з API
-- UX реалізація
-
-**Product Owner / Designer**
-
-- формування вимог
-- UX/UI дизайн
-- пріоритизація задач
-
-## Technologies
+# 4. Technological resources
 
 - **Frontend:** React / TypeScript
 - **Backend:** Python / FastAPI
@@ -140,4 +112,4 @@ gantt
 - отримувати email повідомлення
 - користуватися адміністративною панеллю
 
-**Реліз:** 19.05
+**Реліз:** 19.05.2026
