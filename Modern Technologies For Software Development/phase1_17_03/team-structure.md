@@ -93,7 +93,7 @@ Backend Engineer відповідає за реалізацію серверно
 ---
 
 
-## Зеленько Ірина — Product Owner / QA 
+## Зеленько Ірина — Product Owner / Designer 
 
 Product Owner відповідає за управління вимогами та перевірку якості продукту.
 
