@@ -1,0 +1,100 @@
+name: CI – Backend Tests
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
+
+
+jobs:
+  test:
+    name: pytest (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: homiakdb
+
+      SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-test-secret-key-not-for-production' }}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+
+      NBU_API_URL: https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'dummy-google-client-id' }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET || 'dummy-google-client-secret' }}
+      GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID || 'dummy-github-client-id' }}
+      GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET || 'dummy-github-client-secret' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests with coverage
+        run: |
+          pytest \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:htmlcov \
+            -v \
+            --tb=short
+
+      - name: Upload XML coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-xml-py${{ matrix.python-version }}
+          path: backend/coverage.xml
+          retention-days: 30
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-html-py${{ matrix.python-version }}
+          path: backend/htmlcov/
+          retention-days: 30
+
+      - name: Coverage summary (job annotation)
+        if: always()
+        run: |
+          python - <<'EOF'
+          import xml.etree.ElementTree as ET, sys
+          try:
+              tree = ET.parse("coverage.xml")
+              root = tree.getroot()
+              line_rate = float(root.get("line-rate", 0)) * 100
+              branch_rate = float(root.get("branch-rate", 0)) * 100
+              print(f"::notice title=Coverage::Lines: {line_rate:.1f}%  Branches: {branch_rate:.1f}%")
+          except Exception as e:
+              print(f"::warning::Could not parse coverage.xml – {e}", file=sys.stderr)
+          EOF
+
