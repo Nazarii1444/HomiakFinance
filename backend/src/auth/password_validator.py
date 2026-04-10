@@ -1,10 +1,12 @@
 from pathlib import Path
 
+BASE_DIR = Path(__file__).parent
+
 COMMON_PASSWORDS_1 = set(
-    Path("./auth/500-worst-passwords.txt").read_text(encoding="utf-8").splitlines()
+    (BASE_DIR / "500-worst-passwords.txt").read_text(encoding="utf-8").splitlines()
 )
 COMMON_PASSWORDS_2 = set(
-    Path("./auth/Pwdb_top-1000.txt").read_text(encoding="utf-8").splitlines()
+    (BASE_DIR / "Pwdb_top-1000.txt").read_text(encoding="utf-8").splitlines()
 )
 
 def validate_password(password: str) -> bool:
