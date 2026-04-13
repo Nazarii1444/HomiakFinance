@@ -6,10 +6,13 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.pool import StaticPool
 
-from src.app import app
+from src.app import create_app
 from src.database import Base, get_db
 from src.models import User, Currency, Currencies
 from src.utils.auth_services import hash_password
+
+
+app = create_app(enable_cron=False)
 
 # ── In-memory SQLite (async) ──────────────────────────────────────────────────
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -32,6 +35,7 @@ async def setup_db():
     yield
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -127,3 +131,4 @@ async def auth_headers2(client, test_user2) -> dict:
     })
     token = r.json().get("access_token")
     return {"Authorization": f"Bearer {token}"}
+
