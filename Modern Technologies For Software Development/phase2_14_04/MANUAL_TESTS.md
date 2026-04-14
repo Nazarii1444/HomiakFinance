@@ -1,0 +1,157 @@
+# 🧪 Homiak Finance — Ручне тестування (Manual Test Cases)
+
+**Проєкт:** Homiak Finance Backend  
+**Дата:** 13.04.2026  
+**Середовище:** FastAPI 0.117 · PostgreSQL · Python 3.13  
+**Інструмент:** Postman  
+
+> Усього тест-кейсів: **70**  
+> Категорії: функціональні, негативні, безпекові, нефункціональні (performance, usability)
+
+---
+
+## 1 · Автентифікація (Signup)
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 1 | Реєстрація — валідні дані | Сервер запущено. Email `testuser@example.com` вільний | 1. POST `/api/auth/signup`<br>2. Тіло: `{"username":"testuser","email":"testuser@example.com","password":"Str0ng!Pass"}` | 200; JSON з `access_token`, `refresh_token`, `token_type`=`"bearer"` | Користувач створений з хешем pbkdf2_sha256. GET `/api/users/me` підтверджує: `username`=`"testuser"`, `capital`=`0.0`, `default_currency`=`"USD"` | 🔴 High |
+| 2 | Реєстрація — дублікат email | Користувач з `testuser@example.com` вже існує | 1. POST `/api/auth/signup`<br>2. Тіло: `{"username":"another","email":"testuser@example.com","password":"Str0ng!Pass"}` | 400; `detail`=`"Email already registered"` | Перевірка через `get_user_by_email`. Новий запис НЕ створено | 🔴 High |
+| 3 | Реєстрація — дублікат username | Користувач з `username`=`"testuser"` вже існує | 1. POST `/api/auth/signup`<br>2. Тіло: `{"username":"testuser","email":"new@example.com","password":"Str0ng!Pass"}` | 400; `detail`=`"Username already registered"` | Перевірка через `get_user_by_username`. Новий запис НЕ створено | 🔴 High |
+| 4 | Реєстрація — невалідний email | Сервер запущено | 1. POST `/api/auth/signup` з `"email":"not-an-email"`<br>2. Повторити з `"email":""`<br>3. Повторити з `"email":"a@b"` | 422 для всіх варіантів | Pydantic `EmailStr` валідація відхиляє невалідні формати | 🟠 High |
+| 5 | Реєстрація — короткий username | Сервер запущено | 1. POST `/api/auth/signup` з `"username":"ab"` (2 символи)<br>2. Повторити з `"username":""`<br>3. Повторити з `"username":"abc"` (рівно 3) | 422 для < 3 символів; 3 символи проходить | `Field(min_length=3, max_length=64)` відхиляє короткі значення. Рівно 3 — валідно | 🟡 Medium |
+| 6 | Реєстрація — слабкий пароль | Сервер запущено | 1. POST `/api/auth/signup` з `"password":"password"`<br>2. Повторити з `"password":"12345678"`<br>3. Повторити з `"password":"Ab1!"` (< 8 символів) | 400 для слабких паролів; 422 для < 8 символів | `check_password_strength` перевіряє: великі/малі літери, цифру, спецсимвол, словники 500-worst + top-1000, HaveIBeenPwned API. Pydantic `min_length=8` ловить короткі паролі | 🟠 High |
+
+## 2 · Автентифікація (Login)
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 7 | Логін — валідні дані | Користувач `testuser@example.com` з паролем `Str0ng!Pass` існує | 1. POST `/api/auth/login`<br>2. Тіло: `{"email":"testuser@example.com","password":"Str0ng!Pass"}` | 200; JSON з `access_token` та `refresh_token` | `authenticate_user` верифікує пароль через pbkdf2_sha256. JWT-пара повернута. Подія записана в `logs.log` | 🔴 High |
+| 8 | Логін — case-insensitive email | Користувач `testuser@example.com` існує | 1. POST `/api/auth/login`<br>2. Тіло: `{"email":"TESTUSER@EXAMPLE.COM","password":"Str0ng!Pass"}` | 200; токени повернуті | Роутер викликає `email.strip().lower()` перед пошуком. Логін працює незалежно від регістру | 🟠 High |
+| 9 | Логін — невірний пароль | Користувач `testuser@example.com` існує | 1. POST `/api/auth/login`<br>2. Тіло: `{"email":"testuser@example.com","password":"wrong"}` | 400; `detail`=`"Invalid email or password"` | `authenticate_user` повертає `None`. Повідомлення НЕ розкриває чи існує email | 🔴 High |
+| 10 | Логін — неіснуючий email | Email `nobody@example.com` не зареєстровано | 1. POST `/api/auth/login`<br>2. Тіло: `{"email":"nobody@example.com","password":"Str0ng!Pass"}` | 400; `detail`=`"Invalid email or password"` | Те ж саме повідомлення, що й при невірному паролі — не витікає інформація про існування акаунту | 🟠 High |
+| 11 | Логін — відсутні поля | Сервер запущено | 1. POST `/api/auth/login`<br>2. Тіло: `{}` | 422; помилка валідації | Pydantic відхиляє відсутні обов'язкові поля (`email`, `password`) | 🟡 Medium |
+
+## 3 · JWT та безпека токенів
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 12 | Протермінований JWT | JWT з `exp` у минулому | 1. Згенерувати JWT з `exp`=`now - 1h`<br>2. GET `/api/users/me` з `Authorization: Bearer <expired>` | 401 Unauthorized | `get_current_user_id_from_token` порівнює `now > exp` → HTTPException `"Token expired"` | 🔴 High |
+| 13 | Пошкоджений JWT | Сервер запущено | 1. GET `/api/users/me` з `Bearer invalid.token.here`<br>2. З порожнім Bearer<br>3. З `NotBearer abc123`<br>4. Без заголовка `Authorization` | 401 для всіх випадків | `decode_token` (python-jose) кидає exception. `OAuth2PasswordBearer` відхиляє відсутні/невалідні заголовки | 🔴 High |
+
+## 4 · Профіль користувача
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 14 | GET /api/users/me | Авторизований користувач | 1. GET `/api/users/me` з валідним Bearer-токеном | 200; JSON з `id_`, `username`, `email`, `default_currency`, `timezone`, `capital`, `role` | Dependency `get_current_user` резолвить користувача з JWT `sub`. Хеш пароля НЕ включено у відповідь | 🔴 High |
+| 15 | GET /api/users/{id} — свій ID | Авторизований, `id_`=5 | 1. GET `/api/users/5` | 200; дані поточного користувача | Перевірка `user_id != current_user.id_`. Якщо збіг — повертає дані | 🟠 High |
+| 16 | GET /api/users/{id} — чужий ID | User A авторизований, User B `id_`=10 | 1. GET `/api/users/10` з токеном User A | 404 Not Found | Перевірка `user_id != current_user.id_` → HTTPException 404. Чужий профіль недоступний | 🔴 High |
+| 17 | PATCH — оновити username | Авторизований, `username`=`"oldname"` | 1. PATCH `/api/users/me`<br>2. Тіло: `{"username":"newname"}` | 200; `username`=`"newname"` | `model_dump(exclude_unset=True)` + `setattr` на ORM-об'єкті. Інші поля без змін | 🟠 High |
+| 18 | PATCH — оновити валюту | Авторизований, `default_currency`=`"USD"` | 1. PATCH `/api/users/me`<br>2. Тіло: `{"default_currency":"EUR"}` | 200; `default_currency`=`"EUR"` | Валідація проти enum `Currencies` (USD, EUR, JPY, GBP, AUD, CHF, SEK, NOK, PLN, UAH). Авто-uppercase | 🟠 High |
+| 19 | PATCH — оновити timezone | Авторизований | 1. PATCH `/api/users/me`<br>2. Тіло: `{"timezone":"Europe/Kyiv"}` | 200; `timezone`=`"Europe/Kyiv"` | Поле timezone (max 64 символи) оновлено | 🟡 Medium |
+| 20 | PATCH — порожнє тіло | Авторизований | 1. PATCH `/api/users/me`<br>2. Тіло: `{}` | 200; профіль без змін | `exclude_unset=True` повертає пустий dict → early return без запису в БД | 🟡 Medium |
+| 21 | PATCH — конфлікт username | User A з `"alice"` існує. Авторизований як User B | 1. PATCH `/api/users/me`<br>2. Тіло: `{"username":"alice"}` | 409 Conflict; `detail`=`"Username already taken"` | Запит `User.username == "alice"` з `id_ != current_user.id_`. Дані User B НЕ змінено | 🟠 High |
+| 22 | PATCH — конфлікт email | User A з `a@example.com` існує. Авторизований як User B | 1. PATCH `/api/users/me`<br>2. Тіло: `{"email":"a@example.com"}` | 409 Conflict; `detail`=`"Email already taken"` | Email автоматично `.lower()` перед перевіркою. 409 повернено | 🟠 High |
+| 23 | PATCH — невалідна валюта | Авторизований | 1. PATCH з `{"default_currency":"BTC"}`<br>2. PATCH з `{"default_currency":"US"}` (2 симв.)<br>3. PATCH з `{"default_currency":"usd"}` | 422 для BTC та US; 200 для `"usd"` (→ `"USD"`) | BTC не в enum → 422. `min_length=3` ловить "US". Lowercase автоматично конвертується в uppercase | 🟡 Medium |
+| 24 | DELETE /api/users/me | Авторизований, має транзакції та цілі | 1. DELETE `/api/users/me` | 204 No Content | Каскадне видалення (FK `ondelete="CASCADE"`) знищує всі transactions, goals, notifications | 🔴 High |
+| 25 | Токен після видалення акаунту | Акаунт щойно видалено | 1. GET `/api/users/me` з тим же токеном | 401 Unauthorized | JWT структурно валідний, але `get_current_user` не знаходить user → 401 `"User not found"` | 🔴 High |
+
+## 5 · Транзакції
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 26 | Створення income | Авторизований, `capital`=`0.0`, курс USD є | 1. POST `/api/transactions`<br>2. Тіло: `{"name":"Salary","amount":1000.00,"kind":1,"category_name":"food","currency":"USD"}` | 201; `new_capital`=`1000.0` | Transaction створена з `user_id` з JWT. `convert_to_user_currency` додає суму до capital | 🔴 High |
+| 27 | Створення expense | Авторизований, `capital`=`1000.0`, курс USD є | 1. POST `/api/transactions`<br>2. Тіло: `{"name":"Groceries","amount":150.00,"kind":0,"category_name":"food","currency":"USD"}` | 201; `new_capital`=`850.0` | EXPENSE → від'ємне значення конвертації. `round(1000.0 + (-150.0), 2)` = `850.0` | 🔴 High |
+| 28 | Конвертація валют UAH→USD | `default_currency`=`"USD"`, `capital`=`0.0`, UAH rate=`41.0` | 1. POST `/api/transactions`<br>2. Тіло: `{"name":"Freelance","amount":4100.00,"kind":1,"category_name":"food","currency":"UAH"}` | 201; `new_capital` ≈ `100.0` | Конвертер: `4100 / 41.0 * 1.0 = 100.0`. Pivot через USD працює коректно | 🟠 High |
+| 29 | Від'ємна сума | Авторизований | 1. POST `/api/transactions` з `"amount":-50.00` | 422 Unprocessable Entity | Pydantic `condecimal(ge=0)` відхиляє від'ємні значення | 🟠 High |
+| 30 | Відсутнє обов'язкове поле | Авторизований | 1. POST без `category_name`<br>2. POST з `"category_name":""` | 422 для обох | `category_name` — required, `Field(min_length=1)`. Порожній рядок та відсутність — 422 | 🟡 Medium |
+| 31 | Non-JSON тіло | Авторизований | 1. POST з `Content-Type: text/plain` | 422 Unprocessable Entity | FastAPI не може розпарсити non-JSON тіло | 🟡 Medium |
+| 32 | PATCH — оновлення полів | Авторизований, транзакція N з `name`=`"Old"` | 1. PATCH `/api/transactions/N` з `{"name":"New"}`<br>2. PATCH з `{"amount":999.99}`<br>3. PATCH з `{}` | 200; оновлені поля; порожнє тіло — без змін | `model_dump(exclude_unset=True)` → partial update через `setattr`. Порожнє тіло повертає поточну транзакцію | 🟠 High |
+| 33 | PATCH — чужа транзакція | User A має tx N. Авторизований як User B | 1. PATCH `/api/transactions/N` з токеном B<br>2. Тіло: `{"name":"Hacked"}` | 403 Forbidden | Перевірка `tx.user_id != current_user.id_` → 403. Транзакція User A НЕ змінена | 🔴 High |
+| 34 | GET — існуюча транзакція | Авторизований, власна транзакція N | 1. GET `/api/transactions/N` | 200; дані транзакції | Запит `Transaction.id_ == tx_id AND user_id == current_user.id_`. Повертає `TransactionOut` | 🟠 High |
+| 35 | GET — неіснуюча транзакція | Авторизований, tx 999999 не існує | 1. GET `/api/transactions/999999`<br>2. DELETE `/api/transactions/999999`<br>3. PATCH `/api/transactions/999999` | 404 для всіх | `scalar_one_or_none()` → `None` → HTTPException 404 `"Transaction not found"` | 🟡 Medium |
+| 36 | GET — чужа транзакція | User A має tx N. Авторизований як User B | 1. GET `/api/transactions/N` з токеном B | 404 Not Found | WHERE включає `user_id == current_user.id_`. Для User B транзакція не знайдена. Дані не витікають | 🔴 High |
+| 37 | DELETE — повернення capital | Авторизований, income tx існує, `capital`=`1000.0` | 1. DELETE `/api/transactions/{tx_id}` | 200; `message`=`"Transaction has been deleted"`, `new_capital`=`0.0` | Реверс зміни capital: `capital - convert(...)`. Транзакція видалена (GET → 404), capital відновлено | 🔴 High |
+| 38 | GET — пагінація limit/offset | Авторизований, 15 транзакцій | 1. GET `?limit=5&offset=0` → 5 шт<br>2. GET `?limit=5&offset=5` → наступні 5<br>3. GET `?limit=5&offset=15` → `[]`<br>4. GET `?limit=50` → всі 15<br>5. GET `?limit=0` → 422 | Відповідно до опису | `.limit().offset()` в SQLAlchemy. `Query(50, ge=1, le=1000)` для limit. `limit=0` → 422 (`ge=1`). Сортування `date desc, id_ desc` | 🟡 Medium |
+
+## 6 · Цілі (Goals)
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 39 | Створення цілі | Авторизований | 1. POST `/api/goals`<br>2. Тіло: `{"name":"New Car","summ":25000.0,"saved":500.0}` | 201; `id_`, `name`, `summ`, `saved` | Goal створена з `user_id` з JWT. Повернуто `GoalOut` з ORM-об'єкту | 🟠 High |
+| 40 | Створення — невалідні дані | Авторизований | 1. `{"name":"","summ":1000}` — порожнє ім'я<br>2. `{"name":"G","summ":-100}` — від'ємна сума<br>3. `{"name":"G","summ":0}` — нуль<br>4. `{"name":"G","summ":1000,"saved":-5}` — від'ємний saved<br>5. Без поля `name` | 422 для всіх | Pydantic: `name` min_length=1, `summ` gt=0, `saved` ge=0. Всі невалідні входи відхилено | 🟡 Medium |
+| 41 | Список — пагінація та пошук | Авторизований, 5 цілей | 1. GET `?limit=2&offset=0` → 2 шт<br>2. GET `?limit=2&offset=4` → 1 шт<br>3. GET `?q=Car` → 1 ціль<br>4. GET `?q=NonExistent` → `[]` | Відповідно до опису | `limit`/`offset` через SQLAlchemy. `q` фільтрує по `Goal.name == q` (exact match). Сортування `id_ desc` | 🟡 Medium |
+| 42 | GET — власна ціль | Авторизований, ціль M належить користувачу | 1. GET `/api/goals/M` | 200; дані цілі | `_get_user_goal_or_404` фільтрує по `goal_id` AND `user_id` | 🟠 High |
+| 43 | GET/PATCH/DELETE — чужа ціль | User A має ціль M. Авторизований як User B | 1. GET `/api/goals/M` з токеном B<br>2. PATCH з `{"saved":9999}`<br>3. DELETE | 404 для всіх операцій | WHERE включає `user_id == current_user.id_`. Ціль User A не знайдена для User B та залишається незміненою | 🔴 High |
+| 44 | PATCH — оновлення saved | Авторизований, ціль M належить користувачу | 1. PATCH `/api/goals/M` з `{"saved":3000.0}`<br>2. PATCH з `{}` | 200; `saved`=`3000.0`; порожнє тіло → без змін | `UPDATE ... RETURNING`. Порожній payload → early return з поточними даними | 🟠 High |
+| 45 | DELETE — видалення цілі | Авторизований, ціль M належить користувачу | 1. DELETE `/api/goals/M`<br>2. GET `/api/goals/M` | 204; повторний GET → 404 | Перевірка ownership через `_get_user_goal_or_404`, потім `DELETE FROM goals WHERE ...` | 🟠 High |
+
+## 7 · Валюти (Currencies)
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 46 | GET курс USD | Таблиця `currencies` заповнена | 1. GET `/api/currencies/USD` | 200; тіло = `1.0` | Хардкод: `if code == "USD": return 1.0`. Без звернення до БД | 🟠 High |
+| 47 | GET курс UAH | Таблиця `currencies` заповнена | 1. GET `/api/currencies/UAH` | 200; число > 0 | Запит `Currency.rate` WHERE `name == "UAH"`. Курс з NBU cron | 🟠 High |
+| 48 | GET — неіснуюча валюта | Таблиця `currencies` заповнена | 1. GET `/api/currencies/XYZ` | 404; `detail`=`"Currency not found"` | `scalar_one_or_none()` → `None` → HTTPException 404 | 🟡 Medium |
+| 49 | GET — всі курси | Таблиця `currencies` заповнена | 1. GET `/api/currencies` | 200; JSON `{code: rate}`, USD завжди є, всі значення > 0 | `rates.setdefault("USD", 1.0)` гарантує наявність USD. Мінімум 5 валют після cron | 🟡 Medium |
+
+## 8 · Двофакторна автентифікація (2FA)
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 50 | Setup — генерація secret і QR | Авторизований, 2FA не активована | 1. POST `/api/2fa/setup` | 200; `qr_code_base64` (непустий), `secret` (32 символи base32) | `pyotp.random_base32()` генерує secret, зберігає в `user.twofa_secret`. QR з URI `otpauth://totp/HomiakFinance:<email>?secret=...&issuer=HomiakFinance` | 🟠 High |
+| 51 | Verify — валідний TOTP код | Авторизований, `twofa_secret` встановлено | 1. Згенерувати TOTP з secret<br>2. POST `/api/2fa/verify` з `{"code":"<6_digits>"}` | 200; `message`=`"2FA enabled successfully"` | `pyotp.TOTP(secret).verify(code)` → True. `twofa_enabled = True`, commit | 🟠 High |
+| 52 | Verify — невалідний код | Авторизований, `twofa_secret` встановлено | 1. POST `/api/2fa/verify` з `{"code":"000000"}` | 401; `detail`=`"Invalid 2FA code"` | `totp.verify("000000")` → False. HTTPException 401. `twofa_enabled` не змінився | 🟠 High |
+| 53 | Verify — без попереднього setup | Авторизований, `twofa_secret` = null | 1. POST `/api/2fa/verify` з `{"code":"123456"}` | 400; `detail`=`"2FA not set up"` | Перевірка `if not user.twofa_secret` → HTTPException 400 | 🟡 Medium |
+| 54 | Повторний setup — перезапис secret | Авторизований, 2FA вже налаштована | 1. Запам'ятати старий secret<br>2. POST `/api/2fa/setup`<br>3. Verify зі СТАРИМ кодом<br>4. Verify з НОВИМ кодом | Новий secret; старий код → 401; новий код → 200 | `random_base32()` генерує нове значення. Старий secret перезаписано в БД. Тільки нові TOTP-коди валідні | 🟡 Medium |
+
+## 9 · OAuth
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 55 | Google OAuth — редирект | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` встановлено | 1. GET `/api/auth/google/login` у браузері | Редирект (302) на `accounts.google.com` з `scope=openid email profile`, `prompt=select_account` | Authlib формує OAuth URL. `redirect_uri` → `/api/auth/google/callback` | 🟠 High |
+| 56 | Google OAuth — callback | Авторизація Google пройдена | 1. Завершити Google login<br>2. Callback спрацьовує | 200; JSON з `message`, `access_token`, `refresh_token`, `user_id`, `email`, `name`, `picture`. Cookies встановлено | Створює нового користувача (password=`"__google_oauth__"`) або використовує існуючого. Cookies: `httponly=True, secure=True, samesite=lax` | 🟠 High |
+| 57 | GitHub OAuth — редирект | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` встановлено | 1. GET `/api/auth/github/login` у браузері | Редирект (302) на `github.com/login/oauth/authorize` з `scope=read:user user:email` | Authlib формує OAuth URL. `redirect_uri` → `/api/auth/github/callback` | 🟠 High |
+| 58 | GitHub OAuth — callback | Авторизація GitHub пройдена | 1. Завершити GitHub login<br>2. Callback спрацьовує | 200; JSON з `message`, `access_token`, `refresh_token`, `user_id`, `login`, `name`, `avatar_url`. Cookies встановлено | Отримує профіль + verified email з GitHub API. Створює нового або знаходить існуючого. Cookies встановлено | 🟠 High |
+
+## 10 · Dev Seed
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 59 | Seed — створення тестових даних | Сервер запущено, авторизація НЕ потрібна | 1. POST `/api/dev/seed` (без тіла, без Auth)<br>2. Перевірити відповідь<br>3. Логін створеного юзера з паролем `"password123"`<br>4. GET `/api/transactions?limit=200` | 201; `users_created`=10, `transactions_created`=200, `example_user` з `id_`, `username`, `email` | 10 юзерів (рандомний суфікс), 20 транзакцій кожен (рандомні kind, category, currency, дата ±120 днів). Логін працює. Кожен юзер має 20 транзакцій | 🟢 Low |
+
+## 11 · Health та Middleware
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 60 | Health check — smoke test | Сервер запущено | 1. GET `/health/` | 200; `{"status":"OK"}` | Статичний JSON, без БД та авторизації | 🔴 High |
+| 61 | X-Process-Time — наявність | Сервер запущено | 1. GET `/health/` → перевірити заголовок<br>2. GET `/api/users/me` → перевірити<br>3. GET `/api/transactions` → перевірити<br>4. POST `/api/auth/signup` (невалідний) → перевірити | Заголовок `X-Process-Time` присутній на ВСІХ відповідях, значення — число < 1.0 | Middleware `add_process_time_header` обгортає кожен запит через `time.perf_counter()`. Додається навіть до помилкових відповідей | 🟡 Medium |
+| 62 | Час відповіді — навантаження | Сервер запущено | 1. 100 послідовних GET `/health/`<br>2. Виміряти середній час<br>3. 50 паралельних GET `/health/` | Середній < 50мс; всі 50 → 200; p95 < 200мс | Async-хендлер легковісний. Середній ~5-15мс локально. Конкурентні запити без помилок | 🟡 Medium |
+
+## 12 · CORS та безпека доступу
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 63 | CORS — дозволений origin :3000 | Сервер запущено | 1. OPTIONS `/health/` з `Origin: http://localhost:3000` | `Access-Control-Allow-Origin: http://localhost:3000`, `Access-Control-Allow-Credentials: true` | CORSMiddleware з `origins = ["http://localhost:3000", "http://localhost:5173"]`. Origin відображається у відповіді | 🟠 High |
+| 64 | CORS — дозволений origin :5173 | Сервер запущено | 1. OPTIONS `/health/` з `Origin: http://localhost:5173` | `Access-Control-Allow-Origin: http://localhost:5173` | Другий дозволений origin коректно відображається | 🟠 High |
+| 65 | CORS — заборонений origin | Сервер запущено | 1. OPTIONS `/health/` з `Origin: http://evil.com` | `Access-Control-Allow-Origin` НЕ містить `http://evil.com` | Origin не в дозволеному списку. CORS middleware не додає Allow-Origin для сторонніх | 🟠 High |
+| 66 | CORS — дозволені методи | Сервер запущено | 1. OPTIONS preflight-запит<br>2. Перевірити `Access-Control-Allow-Methods` | Містить GET, POST, PATCH, DELETE, OPTIONS | `allow_methods=["*"]` у конфігурації CORSMiddleware | 🟡 Medium |
+| 67 | Неавторизований доступ | Сервер запущено, без токена | 1. GET `/api/users/me` без Auth<br>2. POST `/api/transactions` без Auth<br>3. GET `/api/goals` без Auth | 401 Unauthorized для всіх | `OAuth2PasswordBearer` кидає 401 при відсутньому токені. Всі захищені роути вимагають `Depends(get_current_user)` | 🔴 High |
+
+## 13 · Документація (Usability)
+
+| № | Назва | Передумови | Кроки | Очікуваний результат | Фактичний результат | Пріоритет |
+|---|-------|-----------|-------|---------------------|---------------------|-----------|
+| 68 | Swagger UI | Сервер на `http://127.0.0.1:8000` | 1. Відкрити `/docs`<br>2. Перевірити заголовок<br>3. Перевірити групи тегів | Swagger UI завантажується; title=`"Homiak Finance"`; теги: Health Check, Auth, Transactions, Users, Currencies, Goals, 2FA, Google OAuth, Github OAuth | FastAPI автогенерує OpenAPI. `FastAPI(title="Homiak Finance")`. Всі теги присутні | 🟢 Low |
+| 69 | ReDoc | Сервер запущено | 1. Відкрити `/redoc` | ReDoc завантажується без помилок | FastAPI роздає ReDoc на `/redoc` за замовчуванням | 🟢 Low |
+| 70 | Try-it-out зі Swagger | Swagger відкрито | 1. Розгорнути `GET /health/`<br>2. "Try it out" → "Execute" | `{"status":"OK"}` зі статусом 200 | Swagger надсилає реальний HTTP-запит. Відповідь відображається inline | 🟢 Low |
+
+---
+
+## Реєстр дефектів
+
+| ID | Тест № | Опис | Пріоритет | Статус |
+|----|--------|------|-----------|--------|
+| — | — | Дефектів під час ручного тестування не виявлено | — | — |
+
+> Таблиця заповнюється по мірі виявлення дефектів.
+
