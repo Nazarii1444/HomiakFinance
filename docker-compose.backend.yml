@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: homiak-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: homiakdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d homiakdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: homiak-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      pytest
+      --cov=src
+      --cov-report=term-missing
+      --cov-report=xml:/reports/coverage.xml
+      --cov-report=html:/reports/htmlcov
+      --junitxml=/reports/junit.xml
+      -v
+      --tb=short
+    volumes:
+      - ./backend/reports:/reports
+    profiles: ["ci"]
+
+volumes:
+  pgdata:

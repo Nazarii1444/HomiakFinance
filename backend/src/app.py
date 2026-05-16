@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from contextlib import asynccontextmanager
 
 import uvicorn
 
@@ -22,8 +23,17 @@ from src.google_oauth.google_router import google_oauth_router
 from src.github_oauth.github_oauth import github_oauth_router
 from src.two_fa.two_fa_router import two_fa_router
 
-from src.database import get_db
+from src.database import get_db, engine, Base
 from src.config import origins
+import src.models  # noqa: F401 – registers all ORM models with Base.metadata
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    """Create all DB tables on startup (dev/docker convenience)."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
 
 
 def create_app(*, enable_cron: bool = True) -> FastAPI:
@@ -36,7 +46,11 @@ def create_app(*, enable_cron: bool = True) -> FastAPI:
         registered as a startup task.  Pass *False* in tests to avoid
         background tasks that prevent the event-loop from closing.
     """
-    application = FastAPI(title="Homiak Finance", description="Homiak Finance API")
+    application = FastAPI(
+        title="Homiak Finance",
+        description="Homiak Finance API",
+        lifespan=lifespan,
+    )
 
     application.add_middleware(
         CORSMiddleware,
