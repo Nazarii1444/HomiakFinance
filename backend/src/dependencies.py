@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, timedelta, timezone
 
 from src.database import get_db
 from src.models import User

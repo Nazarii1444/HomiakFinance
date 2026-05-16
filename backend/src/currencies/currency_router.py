@@ -1,16 +1,14 @@
-from src.config import NBU_API_URL
 from typing import Dict
-from sqlalchemy import select
-from fastapi import APIRouter, HTTPException, status, Depends, FastAPI, Path
+
 import httpx
-from src.database import AsyncSessionLocal
-
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from sqlalchemy.dialects.postgresql import insert
-
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path, status
 from fastapi_utilities import repeat_every
-from src.config import logger
-from src.database import get_db
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.config import NBU_API_URL, logger
+from src.database import AsyncSessionLocal, get_db
 from src.models import Currency
 
 currency_router = APIRouter()

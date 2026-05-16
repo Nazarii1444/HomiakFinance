@@ -1,33 +1,20 @@
-from fastapi import APIRouter, Depends, Request, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.responses import JSONResponse
 
-from src.auth.auth_services import (
-    create_user,
-    authenticate_user
-)
-from src.auth.schemas import (
-    UserCreate,
-    UserLogin,
-    UserLoginResponse,
-    TokenPair
-)
+from src.auth.auth_services import authenticate_user, check_password_strength, create_user
+from src.auth.schemas import TokenPair, UserCreate, UserLogin, UserLoginResponse
 from src.config import logger
 from src.database import get_db
 from src.utils.exceptions import (
     email_already_registered_exception,
-    username_already_registered_exception,
     invalid_credentials_exception,
+    username_already_registered_exception,
 )
 from src.utils.getters_services import (
     get_user_by_email,
     get_user_by_username,
 )
-from src.utils.jwt_handlers import (
-    create_refresh_token,
-    create_access_token
-)
-from src.auth.auth_services import check_password_strength
+from src.utils.jwt_handlers import create_access_token, create_refresh_token
 
 auth_router = APIRouter()
 

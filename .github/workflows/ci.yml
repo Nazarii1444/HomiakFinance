@@ -44,11 +44,9 @@ jobs:
       - name: Build dev image
         run: docker build --target dev -t homiak-backend:dev ./backend
 
-      - name: Run ruff
+      - name: Run ruff (includes import sorting via rule I)
         run: docker run --rm homiak-backend:dev ruff check src tests
 
-      - name: Run isort check
-        run: docker run --rm homiak-backend:dev isort --check-only --diff src tests
 
   # ──────────────────────────────────────────────
   # 3. Tests + Coverage (via Docker Compose)

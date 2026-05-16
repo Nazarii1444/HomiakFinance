@@ -1,9 +1,10 @@
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Dict, Union
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models import Currency, TransactionKind
-from decimal import Decimal, ROUND_HALF_UP
 
+from src.models import Currency, TransactionKind
 
 
 async def get_rates_map(session: AsyncSession, ensure_usd: bool = True) -> Dict[str, float]:

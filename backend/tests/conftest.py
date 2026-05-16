@@ -1,16 +1,14 @@
 import uuid
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.pool import StaticPool
 
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 from src.app import create_app
 from src.database import Base, get_db
-from src.models import User, Currency, Currencies
+from src.models import Currencies, Currency, User
 from src.utils.auth_services import hash_password
-
 
 app = create_app(enable_cron=False)
 

@@ -1,14 +1,15 @@
-import io
 import base64
+import io
+
 import pyotp
 import qrcode
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
-from src.models import User
 from src.dependencies import get_current_user
+from src.models import User
 from src.two_fa.schemas import TwoFASetupResponse, TwoFAVerifyRequest
 
 two_fa_router = APIRouter()

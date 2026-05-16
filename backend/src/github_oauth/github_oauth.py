@@ -1,7 +1,7 @@
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import JSONResponse
 
 from src.auth.auth_services import create_user
 from src.auth.schemas import UserCreate
@@ -9,7 +9,7 @@ from src.config import (
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
     JWT_ACCESS_COOKIE_NAME,
-    JWT_REFRESH_COOKIE_NAME
+    JWT_REFRESH_COOKIE_NAME,
 )
 from src.database import get_db
 from src.utils.getters_services import get_user_by_email

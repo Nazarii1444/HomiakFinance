@@ -1,12 +1,6 @@
-from fastapi import Depends
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database import get_db
-from src.models import UserStatus
-from src.utils.exceptions import user_not_admin_exception, user_not_found_exception
-from src.utils.getters_services import get_user_by_email, get_user_by_id
-from src.utils.jwt_handlers import decode_access_token
+from src.utils.getters_services import get_user_by_email
 
 bcrypt_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 

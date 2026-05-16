@@ -9,23 +9,21 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_utilities import repeat_every
 from starlette.middleware.sessions import SessionMiddleware
 
-from src.health.routers import health_router
+import src.models  # noqa: F401 – registers all ORM models with Base.metadata
 from src.auth.auth_router import auth_router
-from src.transactions.transaction_router import transaction_router
-from src.for_testing.dev_router import dev_router
-from src.users.users_router import users_router
+from src.config import origins
 from src.currencies.currency_router import currency_router, register_currency_cron
+from src.database import Base, engine, get_db
+from src.for_testing.dev_router import dev_router
+from src.github_oauth.github_oauth import github_oauth_router
 from src.goals.goal_router import goal_router
 from src.google_oauth.google_router import google_oauth_router
-from src.github_oauth.github_oauth import github_oauth_router
+from src.health.routers import health_router
+from src.transactions.transaction_router import transaction_router
 from src.two_fa.two_fa_router import two_fa_router
-
-from src.database import get_db, engine, Base
-from src.config import origins
-import src.models  # noqa: F401 – registers all ORM models with Base.metadata
+from src.users.users_router import users_router
 
 
 @asynccontextmanager

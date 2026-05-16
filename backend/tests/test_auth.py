@@ -8,8 +8,9 @@ Real status codes from exceptions.py:
   - weak password (pydantic)  → 422
   - weak password (our check) → 400
 """
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 
 def _mock_pwned(found: bool = False):

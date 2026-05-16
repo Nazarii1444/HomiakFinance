@@ -2,8 +2,8 @@
 API tests – /api/currencies + /health
 Tests: 47-50
 """
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 
 @pytest.mark.asyncio

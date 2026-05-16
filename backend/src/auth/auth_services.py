@@ -1,15 +1,14 @@
-import secrets
-from datetime import timezone, datetime
-import re
-import requests
 import hashlib
+import re
+
+import requests
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.schemas import UserCreate
-from src.models import User, UserStatus
-from src.utils.getters_services import get_user_by_id, get_user_by_email
-from src.utils.auth_services import hash_password, verify_password
 from src.auth.password_validator import validate_password
+from src.auth.schemas import UserCreate
+from src.models import User
+from src.utils.auth_services import hash_password, verify_password
+from src.utils.getters_services import get_user_by_email
 
 
 async def create_user(db: AsyncSession, user: UserCreate) -> User:

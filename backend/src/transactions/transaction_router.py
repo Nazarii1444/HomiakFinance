@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Request, status, Query
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_db
 from src.dependencies import get_current_user
 from src.models import Transaction, TransactionKind, User
-from src.transactions.schemas import TransactionOut, TransactionCreate, TransactionUpdate
 from src.transactions.currency_converter import convert_to_user_currency
+from src.transactions.schemas import TransactionCreate, TransactionOut, TransactionUpdate
 
 ALLOWED_EXPENSES_CATEGORIES = [
     "shopping",

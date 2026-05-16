@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field, condecimal
-from fastapi import Depends
-from decimal import Decimal
-from src.models import TransactionKind
-from typing import Optional, Union
 from datetime import datetime
+from decimal import Decimal
+from typing import Optional, Union
 
+from pydantic import BaseModel, Field, condecimal
+
+from src.models import TransactionKind
 
 Money = condecimal(max_digits=14, decimal_places=2, ge=0)
 

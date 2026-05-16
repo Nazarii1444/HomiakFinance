@@ -1,18 +1,18 @@
-from fastapi import APIRouter, Depends, Request, status
-from starlette.responses import JSONResponse, RedirectResponse
 from authlib.integrations.starlette_client import OAuth
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 
+from src.auth.auth_services import create_user
+from src.auth.schemas import UserCreate
 from src.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     JWT_ACCESS_COOKIE_NAME,
-    JWT_REFRESH_COOKIE_NAME
+    JWT_REFRESH_COOKIE_NAME,
 )
 from src.database import get_db
 from src.utils.getters_services import get_user_by_email
-from src.auth.auth_services import create_user
-from src.auth.schemas import UserCreate
 from src.utils.jwt_handlers import create_access_token, create_refresh_token
 
 google_oauth_router = APIRouter(prefix="/auth/google")

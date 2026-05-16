@@ -1,12 +1,12 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, update, delete
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.goals.schemas import GoalCreate, GoalUpdate, GoalOut
 
 from src.database import get_db
 from src.dependencies import get_current_user
+from src.goals.schemas import GoalCreate, GoalOut, GoalUpdate
 from src.models import Goal, User
 
 goal_router = APIRouter()

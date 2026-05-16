@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Any, Dict
-from jose import jwt, JWTError
-from passlib.context import CryptContext
+from typing import Any, Dict, Optional
 
-from src.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRES
+from jose import jwt
+from passlib.context import CryptContext
+from src.config import ACCESS_TOKEN_EXPIRES, ALGORITHM, SECRET_KEY
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

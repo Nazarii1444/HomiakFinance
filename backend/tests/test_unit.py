@@ -2,9 +2,9 @@
 Unit tests – pure functions, no HTTP, no real DB
 Tests: 29-42
 """
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from datetime import timedelta
 
 
 # ─────────────────────────────────────────────

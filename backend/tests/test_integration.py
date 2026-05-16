@@ -2,11 +2,11 @@
 Integration tests – real async DB session, no HTTP layer
 Tests: 44-54
 """
+from unittest.mock import MagicMock
+
 import pytest
 from sqlalchemy import select
-from unittest.mock import patch, MagicMock
-
-from src.models import User, Transaction, Goal, TransactionKind, Currencies
+from src.models import Currencies, Goal, Transaction, TransactionKind, User
 from src.utils.auth_services import hash_password
 
 

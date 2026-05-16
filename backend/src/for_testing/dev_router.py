@@ -1,12 +1,13 @@
+import random
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-import random
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
-from src.models import User, Transaction, TransactionKind, Currencies
+from src.models import Currencies, Transaction, TransactionKind, User
 from src.utils.auth_services import hash_password
 
 dev_router = APIRouter(tags=["Dev"])

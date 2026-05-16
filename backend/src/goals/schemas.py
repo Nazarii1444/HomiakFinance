@@ -1,5 +1,7 @@
 from typing import Optional
+
 from pydantic import BaseModel, Field
+
 
 class GoalCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)

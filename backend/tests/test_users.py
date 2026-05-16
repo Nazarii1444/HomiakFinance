@@ -53,7 +53,7 @@ class TestUsersAPI:
 
     async def test_delete_me(self, client, db):                                          # 20
         """Creates a throw-away user, deletes via API, confirms 204."""
-        from src.models import User, Currencies
+        from src.models import Currencies, User
         from src.utils.auth_services import hash_password
 
         tmp = User(

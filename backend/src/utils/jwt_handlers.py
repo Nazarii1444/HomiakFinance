@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
-
-from src.utils.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS
 from src.config import SECRET_KEY
+from src.utils.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS
 
 
 async def create_access_token(data: dict, expires_delta: timedelta = None):

@@ -1,6 +1,9 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
 from src.models import UserStatus
+
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

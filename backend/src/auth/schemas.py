@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, constr, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, constr
 
 from src.models import UserStatus
 

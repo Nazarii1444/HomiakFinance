@@ -1,10 +1,21 @@
-from sqlalchemy import Column, Integer, CheckConstraint, Numeric, String, ForeignKey, Float, Boolean, Enum, TIMESTAMP, UniqueConstraint, DateTime
+import enum
+
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from src.database import Base
-
-import enum
 
 
 class UserStatus(enum.Enum):
