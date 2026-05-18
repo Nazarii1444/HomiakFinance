@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  # Backend metrics (Prometheus exposition format via /metrics)
+  - job_name: "homiak-backend-blue"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["homiak-backend-blue:8000"]
+        labels:
+          slot: "blue"
+          env: "production"
+
+  - job_name: "homiak-backend-green"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["homiak-backend-green:8000"]
+        labels:
+          slot: "green"
+          env: "production"
+
+  - job_name: "homiak-backend-staging"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:8080"]
+        labels:
+          slot: "staging"
+          env: "staging"
+
+  # Prometheus itself
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+

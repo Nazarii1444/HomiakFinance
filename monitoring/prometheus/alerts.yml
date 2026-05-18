@@ -1,0 +1,35 @@
+groups:
+  - name: homiak_backend
+    rules:
+      # ── Availability ────────────────────────────────────────────────────────
+      - alert: BackendDown
+        expr: up{job=~"homiak-backend.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend {{ $labels.slot }} ({{ $labels.env }}) is DOWN"
+          description: "Health check endpoint is not responding for more than 1 minute."
+
+      - alert: BackendDegraded
+        expr: >
+          (
+            count(up{job=~"homiak-backend.*", env="production"} == 1) or vector(0)
+          ) < 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No healthy production backend slot"
+          description: "Both blue and green slots appear to be unhealthy."
+
+      # ── Staging ─────────────────────────────────────────────────────────────
+      - alert: StagingDown
+        expr: up{job="homiak-backend-staging"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Staging backend is DOWN"
+          description: "Staging health check has been failing for 5 minutes."
+

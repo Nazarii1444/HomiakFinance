@@ -1,0 +1,48 @@
+services:
+  db-blue:
+    image: postgres:16-alpine
+    container_name: homiak-db-blue
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-homiakdb}
+    volumes:
+      - pgdata_blue:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d homiakdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - homiak-net
+
+  backend-blue:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: homiak-backend-blue
+    image: homiak-backend:${APP_VERSION:-latest}
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db-blue
+      DB_PORT: 5432
+      APP_VERSION: ${APP_VERSION:-dev}
+      SLOT: blue
+    depends_on:
+      db-blue:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+    networks:
+      - homiak-net
+
+volumes:
+  pgdata_blue:
+
+networks:
+  homiak-net:
+    external: true
+

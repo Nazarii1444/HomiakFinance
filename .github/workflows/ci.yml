@@ -198,24 +198,123 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
 
-  # 5. Build summary
+  # ──────────────────────────────────────────────
+  # 5a. Deploy — Staging (runs on develop branch)
+  # ──────────────────────────────────────────────
+  deploy-staging:
+    name: 🧪 Deploy to Staging
+    runs-on: self-hosted          # requires self-hosted runner on target server
+    needs: [build, lint, test]
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: http://localhost:8080
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set APP_VERSION
+        run: echo "APP_VERSION=sha-${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - name: Run Staging deploy
+        env:
+          STAGING_SECRET_KEY: ${{ secrets.STAGING_SECRET_KEY }}
+        run: |
+          chmod +x scripts/deploy-staging.sh
+          APP_VERSION="${APP_VERSION}" ./scripts/deploy-staging.sh
+
+      - name: Post-deploy health check (staging)
+        run: |
+          RESPONSE=$(curl -sf http://localhost:8080/health/)
+          STATUS=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+          echo "Staging status=${STATUS}"
+          [[ "$STATUS" == "ok" ]] || exit 1
+
+      - name: Notify staging deploy success
+        if: success()
+        run: |
+          echo "## 🧪 Staging Deploy Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** \`${APP_VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** http://localhost:8080/health/" >> $GITHUB_STEP_SUMMARY
+
+      - name: Teardown staging on failure
+        if: failure()
+        run: |
+          echo "Staging deploy failed — tearing down ..."
+          docker compose -f docker-compose.staging.yml down || true
+
+  # ──────────────────────────────────────────────
+  # 5b. Deploy — Blue-Green (runs on main branch or v* tags)
+  # ──────────────────────────────────────────────
+  deploy:
+    name: 🚀 Blue-Green Deploy
+    runs-on: self-hosted          # requires self-hosted runner on target server
+    needs: [build, lint, test]
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: http://localhost:8000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set APP_VERSION
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          else
+            echo "APP_VERSION=sha-${GITHUB_SHA::8}" >> $GITHUB_ENV
+          fi
+
+      - name: Run Blue-Green deploy
+        run: |
+          chmod +x scripts/deploy.sh
+          APP_VERSION="${APP_VERSION}" ./scripts/deploy.sh
+
+      - name: Post-deploy health check
+        run: |
+          RESPONSE=$(curl -sf http://localhost:8000/health/)
+          STATUS=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+          VERSION=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+          echo "Status=${STATUS}, Version=${VERSION}"
+          [[ "$STATUS" == "ok" ]] || exit 1
+
+      - name: Notify deploy success
+        if: success()
+        run: |
+          echo "## 🚀 Deploy Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** \`${APP_VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Slot:** \`$(cat .active_slot)\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** http://localhost:8000/health/" >> $GITHUB_STEP_SUMMARY
+
+      - name: Auto-rollback on failure
+        if: failure()
+        run: |
+          echo "Deploy failed — initiating rollback ..."
+          chmod +x scripts/rollback.sh
+          ./scripts/rollback.sh "ci-deploy-failed"
+
+  # ──────────────────────────────────────────────
+  # 6. Build summary
+  # ──────────────────────────────────────────────
   summary:
     name: 📋 Build Summary
     runs-on: ubuntu-latest
-    needs: [build, lint, test]
+    needs: [build, lint, test, deploy-staging, deploy]
     if: always()
     steps:
       - name: Write summary
         run: |
-          echo "##Build Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 🏗️ Build & Deploy Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Docker Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint         | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests        | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Lint         | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Tests        | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Staging      | ${{ needs.deploy-staging.result }} |"
+          echo "| 🚀 Deploy       | ${{ needs.deploy.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY

@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.middleware.sessions import SessionMiddleware
 
 import src.models  # noqa: F401 – registers all ORM models with Base.metadata
@@ -81,6 +82,8 @@ def create_app(*, enable_cron: bool = True) -> FastAPI:
     application.include_router(github_oauth_router, prefix="/api", tags=["Github OAuth"])
     application.include_router(goal_router, prefix="/api/goals", tags=["Goals"])
     application.include_router(two_fa_router, prefix="/api/2fa", tags=["2FA"])
+
+    Instrumentator().instrument(application).expose(application, endpoint="/metrics")
 
     return application
 

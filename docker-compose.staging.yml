@@ -1,0 +1,58 @@
+# =============================================================================
+# docker-compose.staging.yml – Staging environment for HomiakFinance
+#
+# Single-slot deployment (no blue-green for staging).
+# Runs on port 8080 to avoid conflicts with production (8000).
+#
+# Usage:
+#   APP_VERSION=sha-abc1234 docker compose -f docker-compose.staging.yml up -d
+# =============================================================================
+
+services:
+  db-staging:
+    image: postgres:16-alpine
+    container_name: homiak-db-staging
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-homiakdb_staging}
+    volumes:
+      - pgdata_staging:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d homiakdb_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - homiak-staging-net
+
+  backend-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: homiak-backend-staging
+    image: homiak-backend:${APP_VERSION:-staging}
+    env_file:
+      - ./backend/.env.staging
+    environment:
+      DB_HOST: db-staging
+      DB_PORT: 5432
+      APP_VERSION: ${APP_VERSION:-staging}
+      SLOT: staging
+    depends_on:
+      db-staging:
+        condition: service_healthy
+    ports:
+      - "8080:8000"
+    restart: unless-stopped
+    networks:
+      - homiak-staging-net
+
+volumes:
+  pgdata_staging:
+
+networks:
+  homiak-staging-net:
+    driver: bridge
+
