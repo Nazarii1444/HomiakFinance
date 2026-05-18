@@ -89,7 +89,7 @@ jobs:
 
       - name: Run tests with coverage via Docker Compose
         run: |
-          docker compose -f docker-compose.backend.yml \
+          docker compose -f docker-compose.yml \
             --profile ci \
             up --build --abort-on-container-exit \
             --exit-code-from backend-test \
@@ -97,7 +97,7 @@ jobs:
 
       - name: Tear down compose
         if: always()
-        run: docker compose -f docker-compose.backend.yml --profile ci down -v
+        run: docker compose -f docker-compose.yml --profile ci down -v
 
       - name: Upload coverage XML
         uses: actions/upload-artifact@v4
