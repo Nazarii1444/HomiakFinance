@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from datetime import timedelta
 
 from dotenv import load_dotenv
@@ -15,9 +16,15 @@ DB_PORT: int = os.getenv("DB_PORT", default=5432)
 DB_NAME: str = os.getenv("DB_NAME", default="homiakdb")
 
 _db_url_env = os.getenv("DATABASE_URL")
+DB_USE_SSL = False
 if _db_url_env:
     # Support Neon/Render/etc. connection strings; ensure asyncpg driver is used
-    DATABASE_URL = _db_url_env.replace("postgresql://", "postgresql+asyncpg://", 1).replace("postgres://", "postgresql+asyncpg://", 1)
+    _url = _db_url_env.replace("postgresql://", "postgresql+asyncpg://", 1).replace("postgres://", "postgresql+asyncpg://", 1)
+    # asyncpg doesn't accept sslmode= as a URL param — strip it and use connect_args instead
+    _url = re.sub(r'[?&]sslmode=[^&]*', '', _url)
+    _url = re.sub(r'\?$', '', _url)  # remove trailing ?
+    DATABASE_URL = _url
+    DB_USE_SSL = True
 else:
     DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
