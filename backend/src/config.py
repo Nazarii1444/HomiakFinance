@@ -14,12 +14,18 @@ DB_HOST: str = os.getenv("DB_HOST", default="127.0.0.1")
 DB_PORT: int = os.getenv("DB_PORT", default=5432)
 DB_NAME: str = os.getenv("DB_NAME", default="homiakdb")
 
-DATABASE_URL: str = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+_db_url_env = os.getenv("DATABASE_URL")
+if _db_url_env:
+    # Support Neon/Render/etc. connection strings; ensure asyncpg driver is used
+    DATABASE_URL = _db_url_env.replace("postgresql://", "postgresql+asyncpg://", 1).replace("postgres://", "postgresql+asyncpg://", 1)
+else:
+    DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-"http://localhost:5174",
+    "http://localhost:5174",
+    *[o.strip() for o in os.getenv("EXTRA_CORS_ORIGINS", "").split(",") if o.strip()],
 ]
 
 # ===== logging =====
