@@ -24,7 +24,7 @@ interface EditTransactionFormProps {
   setKind: (val: TransactionKind) => void;
   currency: string;
   setCurrency: (val: string) => void;
-  categories: { name: string; icon: JSX.Element }[];
+  categories: { name: string; icon: React.ReactElement }[];
   CURRENCIES: { code: string; symbol: string; name: string }[];
 }
 

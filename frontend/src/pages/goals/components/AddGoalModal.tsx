@@ -24,7 +24,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
             <DialogTitle>Create a New Goal</DialogTitle>
             <DialogContent>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             autoFocus
                             margin="dense"
@@ -36,7 +36,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
                             onChange={(e) => setNewGoalName(e.target.value)}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             margin="dense"
                             label="Target Amount ($)"

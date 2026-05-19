@@ -36,7 +36,7 @@ import EditForm from "./EditModal.tsx";
 
 interface CategoryItem {
   name: string;
-  icon: JSX.Element;
+  icon: React.ReactElement;
 }
 
 interface TransactionModalProps {
